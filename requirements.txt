@@ -1,0 +1,9 @@
+# Production dependencies — pin exact versions to prevent supply-chain surprises.
+# Run `pip-audit` before every merge to check for new CVEs.
+
+mcp==1.26.0
+httpx==0.28.1
+pydantic==2.12.5
+pydantic-settings==2.13.0
+python-dotenv==1.2.1
+structlog==25.5.0
