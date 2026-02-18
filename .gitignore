@@ -1,6 +1,7 @@
 # Secrets (CRITICAL)
 .env
 .env.*
+!.env.example
 credentials.json
 token.json
 *.key
@@ -14,10 +15,9 @@ venv/
 .pytest_cache/
 
 # Logs
-logs/
-*.log
+logs/*.log
+!logs/.gitkeep
 
 # IDE
 .vscode/
 .idea/
-GITIGNORE
