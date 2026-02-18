@@ -1,0 +1,24 @@
+cat > .gitignore << 'GITIGNORE'
+# Secrets (CRITICAL)
+.env
+.env.*
+credentials.json
+token.json
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+.pytest_cache/
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+GITIGNORE
