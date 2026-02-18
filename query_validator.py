@@ -30,32 +30,22 @@ _NAME_PATTERN = re.compile(r"^[A-Za-z\s\-]+$")
 # ---------------------------------------------------------------------------
 
 
-class TechnicianJobQuery(BaseModel):
+class DateRangeQuery(BaseModel):
     """
-    Validated input for the get_technician_jobs MCP tool.
+    Validated date range for business-wide queries (no technician required).
 
     Date handling:
       - If neither start_date nor end_date is given → last full week (Mon–Sun)
       - If only start_date is given → single day
       - If only end_date is given → 7 days ending on end_date
       - If both are given → that range (max 90 days)
+
+    Used directly by: get_revenue_summary, get_no_charge_jobs, compare_technicians.
+    Extended by: TechnicianJobQuery (adds technician name).
     """
 
-    technician_name: str = Field(..., min_length=1, max_length=100)
     start_date: date | None = Field(default=None)
     end_date: date | None = Field(default=None)
-
-    @field_validator("technician_name")
-    @classmethod
-    def _validate_name(cls, v: str) -> str:
-        v = v.strip()
-        if not v:
-            raise ValueError("Technician name cannot be empty")
-        if not _NAME_PATTERN.match(v):
-            raise ValueError(
-                "Technician name may only contain letters, spaces, and hyphens"
-            )
-        return v
 
     @field_validator("start_date", "end_date", mode="before")
     @classmethod
@@ -70,7 +60,7 @@ class TechnicianJobQuery(BaseModel):
             raise ValueError(f"Invalid date {v!r} — use YYYY-MM-DD format")
 
     @model_validator(mode="after")
-    def _validate_range(self) -> "TechnicianJobQuery":
+    def _validate_range(self) -> "DateRangeQuery":
         start, end = self._resolved_range()
         if (end - start).days > _MAX_DATE_RANGE_DAYS:
             raise ValueError(
@@ -106,6 +96,29 @@ class TechnicianJobQuery(BaseModel):
     def get_date_range(self) -> tuple[date, date]:
         """Return the resolved (start, end) date range for this query."""
         return self._resolved_range()
+
+
+class TechnicianJobQuery(DateRangeQuery):
+    """
+    Validated input for technician-specific queries.
+
+    Extends DateRangeQuery with a required technician name field.
+    Used by: get_technician_jobs, get_technician_revenue.
+    """
+
+    technician_name: str = Field(..., min_length=1, max_length=100)
+
+    @field_validator("technician_name")
+    @classmethod
+    def _validate_name(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Technician name cannot be empty")
+        if not _NAME_PATTERN.match(v):
+            raise ValueError(
+                "Technician name may only contain letters, spaces, and hyphens"
+            )
+        return v
 
 
 class TechnicianNameQuery(BaseModel):
