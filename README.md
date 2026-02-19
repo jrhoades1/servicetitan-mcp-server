@@ -14,6 +14,8 @@ Ask Claude natural language questions about technician jobs and business perform
 "How many no-charge jobs were there last week?"
 "What does Freddy's schedule look like this week?"
 "Who had the most scheduled hours last week? Who started earliest?"
+"What is the average revenue per job by job type trending over the last 90 days?"
+"Show revenue trend by business unit for the last 3 months."
 "List all active technicians."
 ```
 
@@ -119,7 +121,7 @@ In a new chat, you should see the tools indicator (⚡ or a hammer icon) confirm
 
 ---
 
-## Available Tools (9 total)
+## Available Tools (10 total)
 
 ### Job Tools
 
@@ -159,6 +161,11 @@ Count and percentage of no-charge jobs in a date range.
 Leaderboard comparing all technicians: jobs, revenue, revenue per job, and no-charge count. Sorted by revenue descending.
 
 **Parameters:** `start_date`, `end_date`
+
+#### `get_revenue_trend`
+Average revenue per job by category (job type or business unit), broken down by month. Shows which categories are trending up or down. Best with a 60-90 day range.
+
+**Parameters:** `group_by` ("job_type" or "business_unit"), `start_date`, `end_date`
 
 ### Schedule Tools
 

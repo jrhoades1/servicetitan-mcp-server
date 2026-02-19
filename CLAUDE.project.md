@@ -66,6 +66,8 @@ Example: `https://api.servicetitan.io/settings/v2/tenant/12345/technicians`
 | Technicians  | `settings` | `/technicians`    | `active=true`                                   |
 | Jobs         | `jpm`      | `/jobs`           | `technicianId`, `completedOnOrAfter`, `completedBefore` |
 | Appointments | `jpm`      | `/appointments`   | `technicianId`, `startsOnOrAfter`, `startsBefore` |
+| Job Types    | `jpm`      | `/job-types`      | (none — returns all, 31 records)                  |
+| Business Units | `settings` | `/business-units` | (none — returns all, 5 records)                 |
 
 > **Unavailable endpoints** (404): `payroll/jobs`, `timetracking/timesheets`, `jpm/time-entries`, `dispatch/timeclock`. No actual clock-in/out data is available via the API.
 
@@ -102,7 +104,7 @@ servicetitan-mcp-server/
 ├── BUILD_APP.md                    # ATLAS+S workflow (framework)
 ├── CLAUDE.project.md               # This file — project-specific config
 ├── README.md                       # Setup and usage instructions
-├── servicetitan_mcp_server.py      # MCP server — 9 tools exposed
+├── servicetitan_mcp_server.py      # MCP server — 10 tools exposed
 ├── servicetitan_client.py          # ServiceTitan OAuth + API client
 ├── query_validator.py              # Pydantic input validation
 ├── config.py                       # Settings loaded from .env
@@ -124,7 +126,7 @@ servicetitan-mcp-server/
 
 ---
 
-## MCP Tools (9 live)
+## MCP Tools (10 live)
 
 | Tool | Description | Key Params |
 |------|-------------|------------|
@@ -137,6 +139,7 @@ servicetitan-mcp-server/
 | `compare_technicians` | Leaderboard: jobs, revenue, $/job | `start_date`, `end_date` |
 | `get_technician_schedule` | Day-by-day appointment schedule | `technician_name`, `start_date`, `end_date` |
 | `compare_technician_hours` | Scheduled hours + earliest start per tech | `start_date`, `end_date` |
+| `get_revenue_trend` | Avg $/job by job type or BU, monthly trend | `group_by`, `start_date`, `end_date` |
 
 **Default date range:** Last full Monday–Sunday week (when no dates given).
 **Schedule tools note:** Show scheduled appointment hours, not actual clock-in/out (unavailable via API).
@@ -263,6 +266,11 @@ Level 3 would add comparison context (e.g., "20% above average").
 ---
 
 ## Changelog
+
+### 2026-02-19 — Revenue Trend Tool
+- Added `get_revenue_trend` — avg $/job by job type or business unit, monthly breakdown
+- Probed and confirmed `jpm/job-types` (31 records) and `settings/business-units` (5 records)
+- Only `id` and `name` used from lookup records — no PII from business unit records exposed
 
 ### 2026-02-19 — Appointment Schedule Tools
 - Added `get_technician_schedule` — day-by-day appointment view per tech
