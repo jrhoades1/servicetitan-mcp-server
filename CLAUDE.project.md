@@ -104,7 +104,7 @@ servicetitan-mcp-server/
 ├── BUILD_APP.md                    # ATLAS+S workflow (framework)
 ├── CLAUDE.project.md               # This file — project-specific config
 ├── README.md                       # Setup and usage instructions
-├── servicetitan_mcp_server.py      # MCP server — 10 tools exposed
+├── servicetitan_mcp_server.py      # MCP server — 11 tools exposed
 ├── servicetitan_client.py          # ServiceTitan OAuth + API client
 ├── query_validator.py              # Pydantic input validation
 ├── config.py                       # Settings loaded from .env
@@ -126,13 +126,14 @@ servicetitan-mcp-server/
 
 ---
 
-## MCP Tools (10 live)
+## MCP Tools (11 live)
 
 | Tool | Description | Key Params |
 |------|-------------|------------|
 | `list_technicians` | List active technicians | `name_filter` (optional) |
 | `get_technician_jobs` | Job counts for one tech | `technician_name`, `start_date`, `end_date` |
 | `get_jobs_summary` | Overall job counts across all techs | `start_date`, `end_date` |
+| `get_jobs_by_type` | Job records filtered by type, with all assigned techs | `job_types`, `start_date`, `end_date`, `technician_name`, `status` |
 | `get_technician_revenue` | Revenue breakdown for one tech | `technician_name`, `start_date`, `end_date` |
 | `get_revenue_summary` | Business-wide revenue totals | `start_date`, `end_date` |
 | `get_no_charge_jobs` | Count and % of no-charge jobs | `start_date`, `end_date` |
@@ -262,6 +263,17 @@ Level 3 would add comparison context (e.g., "20% above average").
 - Use structlog for all logging (JSON format)
 - Make paths absolute using `Path(__file__).parent` anchoring
 - Test `--check` before modifying Claude Desktop config
+
+### After adding, removing, or modifying any MCP tool (MANDATORY)
+Update ALL of these before committing:
+1. **Module docstring** in `servicetitan_mcp_server.py` — tool list at top of file
+2. **MCP Tools table** in `CLAUDE.project.md` — tool count + row in the table
+3. **Available Tools section** in `README.md` — tool count + entry under correct category
+4. **File structure comment** in `CLAUDE.project.md` — tool count in `servicetitan_mcp_server.py` line
+5. **Changelog** in `CLAUDE.project.md` — entry describing what was added/changed
+6. **Confirmed Endpoints table** in `CLAUDE.project.md` — if a new API endpoint was used
+
+This is non-negotiable. Documentation drift causes confusion across sessions.
 
 ---
 

@@ -121,7 +121,7 @@ In a new chat, you should see the tools indicator (⚡ or a hammer icon) confirm
 
 ---
 
-## Available Tools (10 total)
+## Available Tools (11 total)
 
 ### Job Tools
 
@@ -139,6 +139,11 @@ Shows job counts for a specific technician over a date range, broken down by sta
 Shows job totals across all technicians for a date range.
 
 **Parameters:** `start_date`, `end_date`
+
+#### `get_jobs_by_type`
+Individual job-level records filtered by job type name, with all assigned technicians shown (primary + added). Optionally filter by technician or status.
+
+**Parameters:** `job_types` (comma-separated names), `start_date`, `end_date`, `technician_name` (optional), `status` ("All", "Completed", or "Canceled")
 
 ### Revenue Tools
 
