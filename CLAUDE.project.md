@@ -65,6 +65,9 @@ Example: `https://api.servicetitan.io/settings/v2/tenant/12345/technicians`
 |--------------|------------|-------------------|-------------------------------------------------|
 | Technicians  | `settings` | `/technicians`    | `active=true`                                   |
 | Jobs         | `jpm`      | `/jobs`           | `technicianId`, `completedOnOrAfter`, `completedBefore` |
+| Appointments | `jpm`      | `/appointments`   | `technicianId`, `startsOnOrAfter`, `startsBefore` |
+
+> **Unavailable endpoints** (404): `payroll/jobs`, `timetracking/timesheets`, `jpm/time-entries`, `dispatch/timeclock`. No actual clock-in/out data is available via the API.
 
 ### Required Headers (every request)
 ```
@@ -101,7 +104,7 @@ servicetitan-mcp-server/
 ├── SERVICETITAN_CLAUDE_PROJECT.md  # Detailed architecture reference
 ├── SERVICETITAN_QUICK_START.md     # Visual guide to file relationships
 ├── README.md                       # Setup and usage instructions
-├── servicetitan_mcp_server.py      # MCP server — 3 tools exposed
+├── servicetitan_mcp_server.py      # MCP server — 9 tools exposed
 ├── servicetitan_client.py          # ServiceTitan OAuth + API client
 ├── query_validator.py              # Pydantic input validation
 ├── config.py                       # Settings loaded from .env
@@ -123,15 +126,22 @@ servicetitan-mcp-server/
 
 ---
 
-## MCP Tools (live)
+## MCP Tools (9 live)
 
 | Tool | Description | Key Params |
 |------|-------------|------------|
 | `list_technicians` | List active technicians | `name_filter` (optional) |
-| `get_technician_jobs` | Job counts for one tech over a date range | `technician_name`, `start_date`, `end_date` |
+| `get_technician_jobs` | Job counts for one tech | `technician_name`, `start_date`, `end_date` |
 | `get_jobs_summary` | Overall job counts across all techs | `start_date`, `end_date` |
+| `get_technician_revenue` | Revenue breakdown for one tech | `technician_name`, `start_date`, `end_date` |
+| `get_revenue_summary` | Business-wide revenue totals | `start_date`, `end_date` |
+| `get_no_charge_jobs` | Count and % of no-charge jobs | `start_date`, `end_date` |
+| `compare_technicians` | Leaderboard: jobs, revenue, $/job | `start_date`, `end_date` |
+| `get_technician_schedule` | Day-by-day appointment schedule | `technician_name`, `start_date`, `end_date` |
+| `compare_technician_hours` | Scheduled hours + earliest start per tech | `start_date`, `end_date` |
 
 **Default date range:** Last full Monday–Sunday week (when no dates given).
+**Schedule tools note:** Show scheduled appointment hours, not actual clock-in/out (unavailable via API).
 
 ---
 
@@ -255,6 +265,19 @@ Level 3 would add comparison context (e.g., "20% above average").
 ---
 
 ## Changelog
+
+### 2026-02-19 — Appointment Schedule Tools
+- Added `get_technician_schedule` — day-by-day appointment view per tech
+- Added `compare_technician_hours` — scheduled hours and earliest start per tech
+- Probed and confirmed `jpm/appointments` endpoint (supports `technicianId`, `startsOnOrAfter`, `startsBefore`)
+- Confirmed unavailable: `payroll/jobs`, `timetracking/timesheets`, `jpm/time-entries` (404)
+- Added `_SAFE_APPT_FIELDS`, `_scrub_appointment()`, duration/time helpers
+
+### 2026-02-19 — Revenue & Performance Tools
+- Added 4 tools: `get_technician_revenue`, `get_revenue_summary`, `get_no_charge_jobs`, `compare_technicians`
+- Refactored `query_validator.py`: extracted `DateRangeQuery` base class from `TechnicianJobQuery`
+- Added `technicianId` to `_SAFE_JOB_FIELDS` (internal numeric ID, not PII)
+- Added helpers: `_sum_revenue`, `_count_no_charge`, `_fmt_currency`, `_fetch_jobs_params`
 
 ### 2026-02-18 — Assemble Phase Complete
 - Implemented `config.py` (pydantic-settings, SecretStr)

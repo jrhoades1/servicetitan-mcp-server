@@ -233,7 +233,7 @@ servicetitan-mcp-server/
 ├── CLAUDE.project.md                 # This file (project-specific)
 ├── SERVICETITAN_MCP_PROJECT_PLAN.md  # Architecture (ATLAS+S output)
 ├── README.md                         # Setup and usage instructions
-├── servicetitan_mcp_server.py        # Main MCP server
+├── servicetitan_mcp_server.py        # Main MCP server (9 tools)
 ├── servicetitan_client.py            # ServiceTitan API wrapper
 ├── models.py                         # Pydantic models
 ├── query_validator.py                # Input validation + sanitization
@@ -559,6 +559,18 @@ python -c "from query_validator import TechnicianJobQuery; print(TechnicianJobQu
 ---
 
 ## Changelog
+
+### 2026-02-19 — Appointment Schedule Tools
+- Added `get_technician_schedule` and `compare_technician_hours` tools
+- Confirmed `jpm/appointments` endpoint with `technicianId`, `startsOnOrAfter`, `startsBefore` params
+- Confirmed unavailable: `payroll/jobs`, `timetracking/timesheets`, `jpm/time-entries` (all 404)
+- Schedule tools show scheduled hours only (no actual clock-in/out data available via API)
+
+### 2026-02-19 — Revenue & Performance Tools
+- Added 4 tools: `get_technician_revenue`, `get_revenue_summary`, `get_no_charge_jobs`, `compare_technicians`
+- Refactored `query_validator.py` — `DateRangeQuery` base class, `TechnicianJobQuery` extends it
+- Added `technicianId` to `_SAFE_JOB_FIELDS` (internal numeric ID, not PII)
+- Server now has 9 tools total
 
 ### 2026-02-18 — Assemble Phase Complete
 - Implemented all core modules: `config.py`, `logging_config.py`, `servicetitan_client.py`, `query_validator.py`, `servicetitan_mcp_server.py`

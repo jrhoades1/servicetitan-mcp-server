@@ -8,17 +8,20 @@ Ask Claude natural language questions about technician jobs and business perform
 
 ```
 "How many jobs did Freddy do last week?"
-"Show me jobs for all technicians between February 9 and February 15."
-"What's the overall job summary for this week?"
+"How much revenue did Tom bring in last week?"
+"What was total business revenue last week?"
+"Compare all technicians for last week — who brought in the most?"
+"How many no-charge jobs were there last week?"
+"What does Freddy's schedule look like this week?"
+"Who had the most scheduled hours last week? Who started earliest?"
 "List all active technicians."
-"How many jobs did Danny complete in January?"
 ```
 
 ## How It Works
 
 Claude Desktop → MCP Server → ServiceTitan API (read-only)
 
-All data is aggregated before being returned to Claude. Customer names, addresses, and contact information are **never** sent to Claude — only job counts, statuses, and technician names.
+All data is aggregated before being returned to Claude. Customer names, addresses, and contact information are **never** sent to Claude — only job counts, statuses, revenue totals, and technician names.
 
 ---
 
@@ -116,41 +119,64 @@ In a new chat, you should see the tools indicator (⚡ or a hammer icon) confirm
 
 ---
 
-## Available Tools
+## Available Tools (9 total)
 
-### `list_technicians`
+### Job Tools
+
+#### `list_technicians`
 Lists all active technicians. Optionally filter by name.
 
 **Example:** "List all technicians" or "Find technicians named Danny"
 
----
-
-### `get_technician_jobs`
+#### `get_technician_jobs`
 Shows job counts for a specific technician over a date range, broken down by status.
 
-**Parameters:**
-- `technician_name` — Full or partial name (e.g. "Freddy" or "Freddy G")
-- `start_date` — YYYY-MM-DD (defaults to last Monday)
-- `end_date` — YYYY-MM-DD (defaults to last Sunday)
+**Parameters:** `technician_name`, `start_date`, `end_date`
 
-**Example output:**
-```
-Jobs for Freddy G  |  Feb 9 – Feb 15, 2026
-─────────────────────────────────────────────
-Total jobs:  8
+#### `get_jobs_summary`
+Shows job totals across all technicians for a date range.
 
-  Completed            7
-  Cancelled            1
-```
+**Parameters:** `start_date`, `end_date`
+
+### Revenue Tools
+
+#### `get_technician_revenue`
+Revenue breakdown for a specific technician — total revenue, billed vs no-charge, and revenue per job.
+
+**Parameters:** `technician_name`, `start_date`, `end_date`
+
+#### `get_revenue_summary`
+Business-wide revenue totals for a date range.
+
+**Parameters:** `start_date`, `end_date`
+
+#### `get_no_charge_jobs`
+Count and percentage of no-charge jobs in a date range.
+
+**Parameters:** `start_date`, `end_date`
+
+#### `compare_technicians`
+Leaderboard comparing all technicians: jobs, revenue, revenue per job, and no-charge count. Sorted by revenue descending.
+
+**Parameters:** `start_date`, `end_date`
+
+### Schedule Tools
+
+#### `get_technician_schedule`
+Day-by-day appointment schedule for a specific technician, showing start/end times and status.
+
+**Parameters:** `technician_name`, `start_date`, `end_date`
+
+#### `compare_technician_hours`
+Compares all technicians by scheduled appointment hours and earliest start time. Sorted by hours descending.
+
+**Parameters:** `start_date`, `end_date`
+
+> **Note:** Schedule tools show *scheduled* appointment hours — not actual clock-in/out times (clock data is not available via the ServiceTitan API).
 
 ---
 
-### `get_jobs_summary`
-Shows job totals across all technicians for a date range.
-
-**Parameters:**
-- `start_date` — YYYY-MM-DD (defaults to last Monday)
-- `end_date` — YYYY-MM-DD (defaults to last Sunday)
+All date parameters default to last full Monday–Sunday week when omitted. Maximum date range is 90 days.
 
 ---
 
