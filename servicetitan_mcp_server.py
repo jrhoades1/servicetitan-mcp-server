@@ -15,6 +15,7 @@ Tools exposed:
   compare_technicians       — side-by-side jobs, revenue, and $/job for all techs
   get_technician_schedule   — appointments and scheduled hours for one technician
   compare_technician_hours  — scheduled hours and first start time for all techs
+  get_revenue_trend         — avg $/job by job type or business unit, monthly trend
 
 Run this script directly (stdio transport for Claude Desktop):
   python servicetitan_mcp_server.py
@@ -320,6 +321,40 @@ def _fmt_hours(h: float) -> str:
     if mins == 0:
         return f"{hrs}h"
     return f"{hrs}h {mins}m"
+
+
+def _get_month_buckets(start: date, end: date) -> list[tuple[int, int]]:
+    """Return (year, month) tuples spanning start to end inclusive."""
+    buckets: list[tuple[int, int]] = []
+    y, m = start.year, start.month
+    while (y, m) <= (end.year, end.month):
+        buckets.append((y, m))
+        m += 1
+        if m > 12:
+            m, y = 1, y + 1
+    return buckets
+
+
+def _month_label(year: int, month: int, cross_year: bool) -> str:
+    """Short month label. Adds 2-digit year suffix when range crosses years."""
+    label = date(year, month, 1).strftime("%b")
+    return f"{label} {year % 100}" if cross_year else label
+
+
+def _job_month(job: dict) -> tuple[int, int] | None:
+    """Extract (year, month) from a job's completedOn field."""
+    raw = job.get("completedOn") or ""
+    if len(raw) < 7:
+        return None
+    try:
+        return int(raw[:4]), int(raw[5:7])
+    except (ValueError, IndexError):
+        return None
+
+
+def _fmt_dollar_short(amount: float) -> str:
+    """Compact whole-dollar format for trend table columns."""
+    return f"${amount:,.0f}"
 
 
 # ---------------------------------------------------------------------------
@@ -1106,6 +1141,235 @@ async def compare_technician_hours(
 
     except Exception as exc:
         log.error("tool.compare_technician_hours.error", error_type=type(exc).__name__)
+        return f"Error: {_user_friendly_error(exc)}"
+
+
+@mcp.tool()
+async def get_revenue_trend(
+    group_by: str = "job_type",
+    start_date: str = "",
+    end_date: str = "",
+) -> str:
+    """
+    Show average revenue per job by category, broken down by month.
+
+    Reveals which job types or business units are trending up or down
+    in per-job revenue. Best with a wide date range (60-90 days).
+
+    Args:
+        group_by: "job_type" (e.g. CSLD, Slab Repair) or "business_unit"
+                  (e.g. Slab, Pool). Defaults to "job_type".
+        start_date: Start date YYYY-MM-DD. Defaults to last Monday.
+        end_date: End date YYYY-MM-DD. Defaults to last Sunday.
+
+    Monthly avg $/job is calculated from billed jobs only (no-charge excluded).
+    No customer information is included.
+    """
+    log.info(
+        "tool.get_revenue_trend",
+        group_by=group_by,
+        start_date=start_date,
+        end_date=end_date,
+    )
+
+    if group_by not in ("job_type", "business_unit"):
+        return 'Error: group_by must be "job_type" or "business_unit".'
+
+    try:
+        query = DateRangeQuery(
+            start_date=start_date or None,
+            end_date=end_date or None,
+        )
+        start, end = query.get_date_range()
+    except (ValidationError, ValueError) as exc:
+        return f"Error: {_user_friendly_error(exc)}"
+
+    cat_label = "Job Type" if group_by == "job_type" else "Business Unit"
+
+    try:
+        async with ServiceTitanClient(_settings) as client:
+            # Fetch category lookup (only id + name used — PII fields ignored)
+            if group_by == "job_type":
+                raw_cats = await _fetch_all_pages(
+                    client, "jpm", "/job-types", {}, max_records=200,
+                )
+            else:
+                raw_cats = await _fetch_all_pages(
+                    client, "settings", "/business-units", {}, max_records=100,
+                )
+
+            # Fetch all jobs in range
+            jobs = await _fetch_all_pages(
+                client, "jpm", "/jobs",
+                _fetch_jobs_params(start, end),
+                max_records=2000,
+            )
+
+        # Build id → name lookup (only uses id and name — no PII returned)
+        cat_names: dict[int, str] = {
+            c["id"]: c.get("name", f"ID {c['id']}")
+            for c in raw_cats if "id" in c
+        }
+
+        cat_field = "jobTypeId" if group_by == "job_type" else "businessUnitId"
+        months = _get_month_buckets(start, end)
+        cross_year = len(months) > 1 and months[0][0] != months[-1][0]
+
+        # Accumulate: {cat_id: {month: {revenue, billed, total}}}
+        cat_months: dict[int, dict[tuple[int, int], dict]] = {}
+        for job in jobs:
+            cid = job.get(cat_field)
+            if cid is None:
+                continue
+            month = _job_month(job)
+            if month is None or month not in months:
+                continue
+            bucket = cat_months.setdefault(cid, {}).setdefault(
+                month, {"revenue": 0.0, "billed": 0, "total": 0},
+            )
+            bucket["total"] += 1
+            if not job.get("noCharge"):
+                bucket["revenue"] += job.get("total") or 0.0
+                bucket["billed"] += 1
+
+        date_label = _format_date_range(start, end)
+
+        if not cat_months:
+            return (
+                f"Revenue Trend by {cat_label}  |  {date_label}\n"
+                f"{'─' * 50}\n"
+                "No jobs found in this date range."
+            )
+
+        # Build rows sorted by total revenue descending
+        rows: list[tuple] = []
+        for cid, mdata in cat_months.items():
+            name = cat_names.get(cid, f"ID {cid}")
+            t_jobs = sum(m["total"] for m in mdata.values())
+            t_billed = sum(m["billed"] for m in mdata.values())
+            t_rev = sum(m["revenue"] for m in mdata.values())
+            avg = t_rev / t_billed if t_billed > 0 else 0.0
+
+            mavgs: list[float | None] = []
+            for month in months:
+                m = mdata.get(month)
+                if m and m["billed"] > 0:
+                    mavgs.append(m["revenue"] / m["billed"])
+                else:
+                    mavgs.append(None)
+
+            # Trend: first non-None month vs last non-None month
+            first_val = next((v for v in mavgs if v is not None), None)
+            last_val = next((v for v in reversed(mavgs) if v is not None), None)
+            change = (
+                (last_val - first_val) / first_val * 100
+                if first_val and last_val and first_val > 0
+                else None
+            )
+            rows.append((name, t_jobs, t_rev, avg, mavgs, change))
+
+        rows.sort(key=lambda r: r[2], reverse=True)
+
+        # Grand totals per month
+        grand_mavgs: list[float | None] = []
+        for month in months:
+            rev = sum(
+                cat_months[cid].get(month, {}).get("revenue", 0)
+                for cid in cat_months
+            )
+            billed = sum(
+                cat_months[cid].get(month, {}).get("billed", 0)
+                for cid in cat_months
+            )
+            grand_mavgs.append(rev / billed if billed > 0 else None)
+
+        grand_jobs = sum(r[1] for r in rows)
+        grand_rev = sum(r[2] for r in rows)
+        grand_billed = sum(
+            sum(m["billed"] for m in mdata.values())
+            for mdata in cat_months.values()
+        )
+        grand_avg = grand_rev / grand_billed if grand_billed > 0 else 0.0
+        g_first = next((v for v in grand_mavgs if v is not None), None)
+        g_last = next((v for v in reversed(grand_mavgs) if v is not None), None)
+        grand_change = (
+            (g_last - g_first) / g_first * 100
+            if g_first and g_last and g_first > 0
+            else None
+        )
+
+        # Format output
+        month_labels = [_month_label(y, m, cross_year) for y, m in months]
+        name_w = max(len(r[0]) for r in rows)
+        name_w = max(name_w, len(cat_label), 10)
+
+        mcol_w = 8
+        month_header = "  ".join(f"{ml:>{mcol_w}}" for ml in month_labels)
+        header = (
+            f"{cat_label:<{name_w}}  {'Jobs':>5}  {'Avg $/Job':>10}"
+            f"  {month_header}  {'Change':>8}"
+        )
+        sep = "─" * len(header)
+
+        lines = [
+            f"Revenue per Job Trend by {cat_label}  |  {date_label}",
+            sep,
+            header,
+            sep,
+        ]
+
+        for name, t_jobs, t_rev, avg, mavgs, change in rows:
+            mcells = []
+            for v in mavgs:
+                mcells.append(
+                    f"{_fmt_dollar_short(v):>{mcol_w}}" if v is not None
+                    else f"{'—':>{mcol_w}}"
+                )
+            mstr = "  ".join(mcells)
+
+            if change is not None:
+                arrow = "↑" if change >= 0 else "↓"
+                sign = "+" if change >= 0 else ""
+                cstr = f"{arrow} {sign}{change:.0f}%"
+            else:
+                cstr = "—"
+
+            lines.append(
+                f"{name:<{name_w}}  {t_jobs:>5}  {_fmt_currency(avg):>10}"
+                f"  {mstr}  {cstr:>8}"
+            )
+
+        # TOTAL row
+        mcells = []
+        for v in grand_mavgs:
+            mcells.append(
+                f"{_fmt_dollar_short(v):>{mcol_w}}" if v is not None
+                else f"{'—':>{mcol_w}}"
+            )
+        mstr = "  ".join(mcells)
+
+        if grand_change is not None:
+            arrow = "↑" if grand_change >= 0 else "↓"
+            sign = "+" if grand_change >= 0 else ""
+            gcstr = f"{arrow} {sign}{grand_change:.0f}%"
+        else:
+            gcstr = "—"
+
+        lines.append(sep)
+        lines.append(
+            f"{'TOTAL':<{name_w}}  {grand_jobs:>5}  {_fmt_currency(grand_avg):>10}"
+            f"  {mstr}  {gcstr:>8}"
+        )
+
+        if len(months) < 2:
+            lines.append(
+                "\n(Only 1 month in range — use 60-90 days for meaningful trends)"
+            )
+
+        return "\n".join(lines)
+
+    except Exception as exc:
+        log.error("tool.get_revenue_trend.error", error_type=type(exc).__name__)
         return f"Error: {_user_friendly_error(exc)}"
 
 
