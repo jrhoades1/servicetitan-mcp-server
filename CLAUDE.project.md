@@ -101,8 +101,6 @@ servicetitan-mcp-server/
 ├── CLAUDE.md                       # Security standards (framework)
 ├── BUILD_APP.md                    # ATLAS+S workflow (framework)
 ├── CLAUDE.project.md               # This file — project-specific config
-├── SERVICETITAN_CLAUDE_PROJECT.md  # Detailed architecture reference
-├── SERVICETITAN_QUICK_START.md     # Visual guide to file relationships
 ├── README.md                       # Setup and usage instructions
 ├── servicetitan_mcp_server.py      # MCP server — 9 tools exposed
 ├── servicetitan_client.py          # ServiceTitan OAuth + API client
