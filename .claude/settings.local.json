@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(venv/Scripts/pip list:*)",
+      "Bash(\"c:/Users/Tracy/Projects/servicetitan-mcp-server/venv/Scripts/pip.exe\" list)",
+      "Bash(venv/Scripts/python.exe:*)",
+      "Bash(findstr:*)",
+      "Read(//c/Users/Tracy/AppData/Local/Claude/Logs/**)",
+      "Bash(taskkill:*)",
+      "Read(//c/Users/Tracy/AppData/Local/Packages/Claude_pzs8sxrjxfjjc/LocalCache/Roaming/Claude/logs/**)",
+      "Read(//c/Users/Tracy/AppData/Local/Packages/Claude_pzs8sxrjxfjjc/LocalCache/Roaming/Claude/**)",
+      "Read(//c/Windows/**)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(ls:*)",
+      "Bash(python:*)",
+      "Bash(git -C \"C:/Users/Tracy/Projects/servicetitan-mcp-server\" ls-files:*)",
+      "Bash(git -C 'C:\\\\Users\\\\Tracy\\\\Projects\\\\servicetitan-mcp-server' status)",
+      "Bash(git -C 'C:\\\\Users\\\\Tracy\\\\Projects\\\\servicetitan-mcp-server' status:*)",
+      "Bash(git -C 'C:\\\\Users\\\\Tracy\\\\Projects\\\\servicetitan-mcp-server' add .gitignore CLAUDE.project.md README.md SERVICETITAN_CLAUDE_PROJECT.md .env.example \"logs/.gitkeep\")",
+      "Bash(git -C:*)",
+      "Bash(gh auth status:*)",
+      "Bash(del \"C:\\\\Users\\\\Tracy\\\\Projects\\\\servicetitan-mcp-server\\\\probe_api.py\")",
+      "Bash(git push:*)",
+      "Bash(wc:*)",
+      "Bash(git rm:*)",
+      "Bash(./venv/Scripts/python.exe:*)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\Tracy\\AppData\\Local\\Packages\\Claude_pzs8sxrjxfjjc\\LocalCache\\Roaming\\Claude"
+    ]
+  }
+}

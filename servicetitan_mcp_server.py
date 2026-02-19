@@ -42,7 +42,12 @@ from pydantic import ValidationError
 
 from config import get_settings
 from logging_config import configure_logging
-from query_validator import DateRangeQuery, TechnicianJobQuery, TechnicianNameQuery
+from query_validator import (
+    DateRangeQuery,
+    TechnicianJobQuery,
+    TechnicianNameQuery,
+    JobsByTypeQuery,
+)
 from servicetitan_client import (
     ServiceTitanAPIError,
     ServiceTitanAuthError,
@@ -703,6 +708,220 @@ async def get_revenue_summary(
 
     except Exception as exc:
         log.error("tool.get_revenue_summary.error", error_type=type(exc).__name__)
+        return f"Error: {_user_friendly_error(exc)}"
+
+
+@mcp.tool()
+async def get_jobs_by_type(
+    job_types: str,
+    start_date: str = "",
+    end_date: str = "",
+    technician_name: str = "",
+    status: str = "All",
+) -> str:
+    """
+    Return individual job-level records filtered by job type, including all technicians assigned.
+
+    Args follow the `JobsByTypeQuery` model. Returns a PII-free, human-readable list.
+    """
+    log.info(
+        "tool.get_jobs_by_type",
+        job_types=job_types,
+        start_date=start_date,
+        end_date=end_date,
+        technician_name=technician_name,
+        status=status,
+    )
+
+    try:
+        query = JobsByTypeQuery(
+            job_types=job_types,
+            start_date=start_date or None,
+            end_date=end_date or None,
+            technician_name=technician_name or None,
+            status=status or "All",
+        )
+        start, end = query.get_date_range()
+    except (ValidationError, ValueError) as exc:
+        return f"Error: {_user_friendly_error(exc)}"
+
+    try:
+        async with ServiceTitanClient(_settings) as client:
+            # Fetch job-type lookup
+            raw_types = await _fetch_all_pages(client, "jpm", "/job-types", {}, max_records=500)
+            type_names: dict[int, str] = {t["id"]: t.get("name", f"ID {t['id']}") for t in raw_types if "id" in t}
+            name_to_id = {t.get("name", "").lower(): t["id"] for t in raw_types if "id" in t}
+
+            # Map requested names to ids
+            wanted = query.job_type_list()
+            wanted_ids: set[int] = set()
+            missing: list[str] = []
+            for wt in wanted:
+                kid = name_to_id.get(wt.lower())
+                if kid is None:
+                    missing.append(wt)
+                else:
+                    wanted_ids.add(kid)
+
+            if missing:
+                sample = ", ".join(sorted(list(name_to_id.keys())[:20]))
+                return (
+                    f"Unknown job type(s): {', '.join(missing)}.\n"
+                    f"Available job types (sample): {sample}"
+                )
+
+            # Fetch all jobs and appointments in the date range, then filter locally
+            jobs = await _fetch_all_pages(
+                client, "jpm", "/jobs", _fetch_jobs_params(start, end), max_records=3000
+            )
+
+            appts = await _fetch_all_pages(
+                client, "jpm", "/appointments", _fetch_appt_params(start, end), max_records=5000
+            )
+
+            # Technician lookup
+            all_techs = await _fetch_all_pages(client, "settings", "/technicians", {"active": "true"}, max_records=500)
+            tech_names = {t["id"]: t.get("name", f"Tech {t['id']}") for t in all_techs if "id" in t}
+
+            # Business unit lookup
+            raw_bus = await _fetch_all_pages(client, "settings", "/business-units", {}, max_records=200)
+            bus_names = {b["id"]: b.get("name", f"BU {b['id']}") for b in raw_bus if "id" in b}
+
+        # Build jobId -> assigned technicians from appointments
+        job_techs: dict[int, list[dict]] = {}
+        for a in appts:
+            jid = a.get("jobId")
+            if jid is None:
+                continue
+            assigned = a.get("assignedTechnicians") or []
+            for at in assigned:
+                tid = at.get("technicianId")
+                if tid is None:
+                    continue
+                entry = {
+                    "id": tid,
+                    "role": at.get("role") or ("Primary" if tid == a.get("technicianId") else "Added"),
+                    "is_original": bool(at.get("isOriginal") or at.get("original", False)),
+                }
+                # avoid duplicates
+                lst = job_techs.setdefault(jid, [])
+                if not any(x["id"] == tid and x["role"] == entry["role"] for x in lst):
+                    lst.append(entry)
+
+        # If technician_name filter provided, resolve and require match
+        tech_filter_id: int | None = None
+        if query.technician_name:
+            async with ServiceTitanClient(_settings) as client:
+                matches = await _find_technician(client, query.technician_name)
+            if not matches:
+                return f'No technician found matching "{query.technician_name}".'
+            if len(matches) > 1:
+                names = ", ".join(t.get("name", "") for t in matches)
+                return (
+                    f'"{query.technician_name}" matches multiple technicians: {names}.\nPlease be more specific.'
+                )
+            tech_filter_id = matches[0]["id"]
+
+        # Filter jobs by requested job types and status and technician filter
+        filtered: list[dict] = []
+        for job in jobs:
+            if job.get("jobTypeId") not in wanted_ids:
+                continue
+            jstatus = job.get("jobStatus", "Unknown")
+            if query.status != "All":
+                if query.status == "Completed" and jstatus != "Completed":
+                    continue
+                if query.status == "Canceled" and jstatus != "Canceled":
+                    continue
+
+            # technician_name filter: include job if any assigned tech matches or job.technicianId matches
+            if tech_filter_id is not None:
+                assigned = job_techs.get(job.get("id"), [])
+                assigned_ids = {a["id"] for a in assigned}
+                primary = job.get("technicianId")
+                if tech_filter_id != primary and tech_filter_id not in assigned_ids:
+                    continue
+
+            filtered.append(job)
+
+        # Build output lines
+        date_label = _format_date_range(start, end)
+        # Use the first requested job type name (for header)
+        header_type_name = None
+        for tid in wanted_ids:
+            header_type_name = type_names.get(tid)
+            if header_type_name:
+                break
+        header_type_name = header_type_name or ", ".join(query.job_type_list())
+
+        lines: list[str] = [f"{header_type_name} Jobs  |  {date_label}", f"{'─' * 50}"]
+
+        # Technician summary counter
+        tech_counter: dict[str, int] = {}
+        total_revenue = 0.0
+
+        if not filtered:
+            lines.append("No matching jobs found in this date range.")
+            return "\n".join(lines)
+
+        # Sort by completedOn
+        filtered.sort(key=lambda j: j.get("completedOn") or "")
+
+        for job in filtered:
+            jid = job.get("id")
+            jobnum = job.get("jobNumber") or jid
+            completed = (job.get("completedOn") or "")[:10] if job.get("completedOn") else "—"
+            total = job.get("total") or 0.0
+            total_revenue += total
+            bu = bus_names.get(job.get("businessUnitId"), "—")
+            jt_name = type_names.get(job.get("jobTypeId"), "—")
+
+            lines.append(f"Job #{jobnum}  |  {completed}  |  {_fmt_currency(total)}  |  {bu}")
+            techs = []
+            assigned = job_techs.get(jid, [])
+            # ensure primary is listed first
+            primary_id = job.get("technicianId")
+            if primary_id is not None and not any(a["id"] == primary_id for a in assigned):
+                assigned.insert(0, {"id": primary_id, "role": "Primary", "is_original": False})
+
+            for a in assigned:
+                tid = a.get("id")
+                name = tech_names.get(tid, f"Tech {tid}")
+                role = a.get("role") or ("Primary" if tid == primary_id else "Added")
+                is_orig = a.get("is_original", False)
+                label = f"{name} ({role})"
+                if is_orig:
+                    label += " (Original)"
+                techs.append(label)
+                tech_counter[name] = tech_counter.get(name, 0) + 1
+
+            if techs:
+                lines.append(f"  Technicians: {', '.join(techs)}")
+            else:
+                lines.append("  Technicians: —")
+
+            # related job id if present
+            rid = job.get("relatedJobId") or (job.get("relatedJob") or {}).get("id")
+            if rid:
+                lines.append(f"  Related job: {rid}")
+
+            lines.append("")
+
+        # Summary block
+        total_jobs = len(filtered)
+        no_charge = _count_no_charge(filtered)
+        lines.append("Summary:")
+        lines.append(f"  total_jobs: {total_jobs}")
+        lines.append(f"  total_revenue: {_fmt_currency(total_revenue)}")
+        lines.append(f"  no_charge_count: {no_charge}")
+        if tech_counter:
+            summary = "  technician_summary: " + "  |  ".join(f"{name}: {count}" for name, count in sorted(tech_counter.items(), key=lambda x: x[1], reverse=True))
+            lines.append(summary)
+
+        return "\n".join(lines)
+
+    except Exception as exc:
+        log.error("tool.get_jobs_by_type.error", error_type=type(exc).__name__)
         return f"Error: {_user_friendly_error(exc)}"
 
 

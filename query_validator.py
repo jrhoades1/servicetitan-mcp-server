@@ -135,3 +135,51 @@ class TechnicianNameQuery(BaseModel):
                 "Search text may only contain letters, spaces, and hyphens"
             )
         return v
+
+
+
+class JobsByTypeQuery(DateRangeQuery):
+    """
+    Validated input for job-type queries.
+
+    Fields:
+      - job_types: required comma-separated job type names (exact match expected)
+      - technician_name: optional technician name fragment
+      - status: Optional filter: "Completed", "Canceled", or "All"
+    """
+
+    job_types: str = Field(..., min_length=1, max_length=200)
+    technician_name: str | None = Field(default=None, max_length=100)
+    status: str = Field(default="All")
+
+    @field_validator("job_types")
+    @classmethod
+    def _validate_job_types(cls, v: str) -> str:
+        v = str(v).strip()
+        if not v:
+            raise ValueError("job_types cannot be empty — provide one or more job type names")
+        return v
+
+    @field_validator("technician_name")
+    @classmethod
+    def _validate_technician_name(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        v = v.strip()
+        if v and not _NAME_PATTERN.match(v):
+            raise ValueError("Technician name may only contain letters, spaces, and hyphens")
+        return v
+
+    @field_validator("status")
+    @classmethod
+    def _validate_status(cls, v: str) -> str:
+        allowed = {"Completed", "Canceled", "All"}
+        v = str(v).strip()
+        if v not in allowed:
+            raise ValueError('status must be one of: Completed, Canceled, All')
+        return v
+
+    def job_type_list(self) -> list[str]:
+        """Return cleaned list of job type names (trimmed)."""
+        parts = [p.strip() for p in self.job_types.split(",")]
+        return [p for p in parts if p]
