@@ -328,6 +328,15 @@ If unsure whether something is safe, default to rejecting the input.
 | AI features | Input sanitization, output validation, rate limiting, cost controls |
 | Dependencies | Audit run, lockfile reviewed, no loose semver |
 
+### Documentation Sync (MANDATORY — after every feature change)
+When adding, removing, or modifying any feature, public API, tool, or endpoint:
+1. Update **all** documentation that references the changed feature — README, project docs, inline doc comments, module docstrings
+2. Check `CLAUDE.project.md` for a project-specific doc-update checklist and follow it exactly
+3. Keep counts, tables, and file structure comments in sync with reality
+4. Never commit code changes without the corresponding doc updates in the same commit
+
+Documentation drift across sessions is the #1 source of confusion. Treat docs like code — if it's stale, it's a bug.
+
 ### Final Steps (always before presenting code)
 1. Format code with Prettier
 2. Run ESLint and fix all issues (or document why an issue is intentionally ignored)
