@@ -1,11 +1,11 @@
-# BUILD_APP.md — ATLAS+S Workflow (Secure by Default) v4.0
+# BUILD_APP.md — CITADEL Workflow (Secure by Default) v4.0
 
 > **Read `CLAUDE.md` before executing this workflow.** It contains the code quality and security rules that apply during the Assemble step and all code generation.
 >
 > **For beginners:** If this is your first time with Claude Code, start with `SETUP_GUIDE.md` to set up your environment safely.
 
 
-Build **secure**, production-ready applications using AI assistance within the ATLAS+S framework. This workflow ensures apps are hardened against attacks, not just functional.
+Build **secure**, production-ready applications using AI assistance within the CITADEL framework. This workflow ensures apps are hardened against attacks, not just functional.
 ---
 
 ## Goal
@@ -56,7 +56,7 @@ AI executes: DROP TABLE users; DROP TABLE orders; ...
 ### AI Output Validation
 
 - If AI suggests insecure patterns (skipping RLS, using unsafe defaults), **reject and re-prompt** with clearer constraints
-- Cross-check AI outputs against this entire ATLAS+S workflow before committing
+- Cross-check AI outputs against this entire CITADEL workflow before committing
 - Run security scans on AI-generated code same as human-written code
 - **Don't trust AI for security decisions - always verify**
 
@@ -103,25 +103,23 @@ When building applications that use AI features (chatbots, code generation, cont
 
 ---
 
-## ATLAS+S Workflow
+## CITADEL Workflow
 
-**ATLAS+S** is a 6-step process with security integrated:
+**CITADEL** is a 7-step process with security integrated at every phase:
 
 | Step | Phase | What You Do |
 |------|-------|-------------|
-| **A** | Architect | Define problem, users, success metrics, **threat model** |
-| **T** | Trace | Data schema, integrations map, stack proposal, **security architecture** |
-| **L** | Link | Validate ALL connections, **secure configuration** |
+| **C** | Conceive | Define problem, users, success metrics, **threat model** |
+| **I** | Inventory | Data schema, integrations map, stack proposal, **security architecture** |
+| **T** | Tie | Validate ALL connections, **secure configuration** |
 | **A** | Assemble | Build with layered architecture, **input validation, auth** |
-| **S** | Stress-test | Test functionality, error handling, **security testing** |
-| **S** | Secure | **Mandatory**: Vulnerability scan, dependency check, secure deployment checklist |
-
-For production deployments, also add:
-+ **M** - Monitor (logging, observability, alerts, **security events**, incident response) — **MANDATORY for live apps**
+| **D** | Drill | Test functionality, error handling, **security testing** |
+| **E** | Enforce | **Mandatory**: Vulnerability scan, dependency check, secure deployment checklist |
+| **L** | Look | Logging, observability, alerts, **security events**, incident response — **MANDATORY for live apps** |
 
 ---
 
-## A — Architect
+## C — Conceive
 
 **Purpose:** Know exactly what you're building AND how to secure it before touching code.
 
@@ -197,7 +195,7 @@ For production deployments, also add:
 
 ---
 
-## T — Trace
+## I — Inventory
 
 **Purpose:** Design security BEFORE building. This is where most insecure apps fail.
 
@@ -392,7 +390,7 @@ Document what could break AND what could be exploited:
 
 ---
 
-## L — Link
+## T — Tie
 
 **Purpose:** Validate all connections SECURELY before building. Nothing worse than building for 2 hours then discovering the API doesn't work OR that you've leaked credentials.
 
@@ -880,7 +878,7 @@ Working application with:
 
 ---
 
-## S — Stress-test
+## D — Drill
 
 **Purpose:** Test functionality AND security before shipping. This is the step most "vibe coding" tutorials skip entirely.
 
@@ -1128,7 +1126,7 @@ don't remove the control.
 
 ---
 
-## S — Secure (Mandatory Pre-Deployment)
+## E — Enforce (Mandatory Pre-Deployment)
 
 **Purpose:** Final security validation. DO NOT DEPLOY until this passes.
 
@@ -1536,7 +1534,7 @@ When you're ready to deploy, explicitly ask. This keeps deployment decisions in 
 
 ---
 
-## M — Monitor (MANDATORY for Live Apps)
+## L — Look (MANDATORY for Live Apps)
 
 **Purpose:** Detect attacks, catch breaches early, and respond before damage compounds. Production without monitoring is flying blind.
 
@@ -1769,14 +1767,15 @@ These mistakes lead to breaches and data loss:
 
 ## GOTCHA Layer Mapping
 
-| ATLAS+S Step | GOTCHA Layer | Security Focus |
+| CITADEL Step | GOTCHA Layer | Security Focus |
 |--------------|--------------|----------------|
-| Architect | Goals | Define security requirements |
-| Trace | Context | Document security architecture |
-| Link | Args | Validate secure configuration |
+| Conceive | Goals | Define security requirements |
+| Inventory | Context | Document security architecture |
+| Tie | Args | Validate secure configuration |
 | Assemble | Tools | Implement security controls |
-| Stress-test | Orchestration | Verify security works |
-| Secure | Validation | Final security audit |
+| Drill | Orchestration | Verify security works |
+| Enforce | Validation | Final security audit |
+| Look | Monitoring | Production observability & incident response |
 
 ---
 

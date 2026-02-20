@@ -6,7 +6,7 @@
 
 ## Related Workflow Documents
 
-- **`BUILD_APP.md`** — The ATLAS+S v4.0 project methodology. Read this at the start of any new project or feature build before writing code. It includes: Zero-Trust architecture, Enterprise secrets management, API security hardening, Performance vs security trade-offs, full Monitor step, and Incident Response playbook.
+- **`BUILD_APP.md`** — The CITADEL v4.0 project methodology. Read this at the start of any new project or feature build before writing code. It includes: Zero-Trust architecture, Enterprise secrets management, API security hardening, Performance vs security trade-offs, full Look (monitor) step, and Incident Response playbook.
 - **`CLAUDE.project.md`** *(per-repo)* — Project-specific overrides: tech stack, CLI tools, doc references, package manager. Always check for this file in the project root.
 - **`SETUP_GUIDE.md`** — For onboarding new team members or setting up new development environments. Contains beginner-safe instructions for Claude Code setup.
 
@@ -363,7 +363,7 @@ Documentation drift across sessions is the #1 source of confusion. Treat docs li
 ### v2.0.0 — Production Hardening (February 2026)
 - **Enhanced:** Cross-references to BUILD_APP v4.0 and SETUP_GUIDE v2.0
 - **Clarified:** This file is production-ready and tested
-- **Confirmed:** All security practices align with ATLAS+S v4.0 workflow
+- **Confirmed:** All security practices align with CITADEL v4.0 workflow
 - Original comprehensive security framework maintained
 
 **This version works in production with BUILD_APP v4.0 and SETUP_GUIDE v2.0.**
