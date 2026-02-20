@@ -17,6 +17,10 @@ Ask Claude natural language questions about technician jobs and business perform
 "What is the average revenue per job by job type trending over the last 90 days?"
 "Show revenue trend by business unit for the last 3 months."
 "List all active technicians."
+"What job types does Freddy do? Break down his job mix for the last 90 days."
+"Compare all technicians by job type for the last 90 days."
+"How many cancellations were there last month? How many were late?"
+"Show discount activity for last month."
 ```
 
 ## How It Works
@@ -121,7 +125,7 @@ In a new chat, you should see the tools indicator (⚡ or a hammer icon) confirm
 
 ---
 
-## Available Tools (11 total)
+## Available Tools (15 total)
 
 ### Job Tools
 
@@ -186,6 +190,28 @@ Compares all technicians by scheduled appointment hours and earliest start time.
 
 > **Note:** Schedule tools show *scheduled* appointment hours — not actual clock-in/out times (clock data is not available via the ServiceTitan API).
 
+### Analysis Tools
+
+#### `get_technician_job_mix`
+Break down a technician's jobs by job type — count, revenue, avg $/job per type. Shows what percentage of their work and revenue comes from each job type.
+
+**Parameters:** `technician_name`, `start_date`, `end_date`
+
+#### `compare_technician_job_mix`
+Company-wide matrix comparing all technicians across all job types. Shows who handles what work and how their $/job compares to the company average. Optionally filter to a single job type.
+
+**Parameters:** `job_type` (optional), `start_date`, `end_date`
+
+#### `get_cancellations`
+Canceled job records with timing analysis — how far in advance each was canceled and whether it was a late cancel (within 24 hours of the appointment). Tags shown as cancel reason proxy.
+
+**Parameters:** `technician_name` (optional), `late_only` (optional), `start_date`, `end_date`
+
+#### `get_technician_discounts`
+Discount and credit activity per technician from invoices. Detects discounts via negative line items. Shows discount count, total amount, and common SKUs.
+
+**Parameters:** `technician_name` (optional), `min_discount_amount` (optional), `start_date`, `end_date`
+
 ---
 
 All date parameters default to last full Monday–Sunday week when omitted. Maximum date range is 90 days.
@@ -240,9 +266,9 @@ See `CLAUDE.project.md` → "Adding New Features" for the step-by-step process.
 
 The general pattern:
 
-1. Add a new `@mcp.tool()` function in `servicetitan_mcp_server.py`
+1. Add a new `@mcp.tool()` function in the appropriate `tools_*.py` module
 2. Add input validation in `query_validator.py`
-3. Add the API call (GET only) in `servicetitan_client.py`
+3. Add shared helpers in `shared_helpers.py` if needed
 4. Scrub PII before returning data
 5. Update this README with the new tool
 

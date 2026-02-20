@@ -183,3 +183,63 @@ class JobsByTypeQuery(DateRangeQuery):
         """Return cleaned list of job type names (trimmed)."""
         parts = [p.strip() for p in self.job_types.split(",")]
         return [p for p in parts if p]
+
+
+class JobMixCompareQuery(DateRangeQuery):
+    """
+    Validated input for compare_technician_job_mix.
+
+    Optional job_type filter scopes the comparison to a single job type.
+    """
+
+    job_type: str | None = Field(default=None, max_length=200)
+
+    @field_validator("job_type")
+    @classmethod
+    def _validate_job_type(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        v = v.strip()
+        return v if v else None
+
+
+class CancellationQuery(DateRangeQuery):
+    """
+    Validated input for get_cancellations.
+
+    Optional technician_name filter and late_only boolean.
+    """
+
+    technician_name: str | None = Field(default=None, max_length=100)
+    late_only: bool = Field(default=False)
+
+    @field_validator("technician_name")
+    @classmethod
+    def _validate_technician_name(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        v = v.strip()
+        if v and not _NAME_PATTERN.match(v):
+            raise ValueError("Technician name may only contain letters, spaces, and hyphens")
+        return v
+
+
+class DiscountQuery(DateRangeQuery):
+    """
+    Validated input for get_technician_discounts.
+
+    Optional technician_name filter and minimum discount threshold.
+    """
+
+    technician_name: str | None = Field(default=None, max_length=100)
+    min_discount_amount: float = Field(default=0.0, ge=0.0)
+
+    @field_validator("technician_name")
+    @classmethod
+    def _validate_technician_name(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        v = v.strip()
+        if v and not _NAME_PATTERN.match(v):
+            raise ValueError("Technician name may only contain letters, spaces, and hyphens")
+        return v

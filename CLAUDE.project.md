@@ -1,6 +1,6 @@
 # CLAUDE.project.md — ServiceTitan MCP Server
 
-> **Important:** This project follows the **BUILD_APP.md ATLAS+S workflow**.
+> **Important:** This project follows the **BUILD_APP.md CITADEL workflow**.
 > Stack-specific rules, CLI tools, and confirmed API details are documented here.
 
 ---
@@ -14,14 +14,14 @@
 - **Deployment:** Local — Claude Desktop on Windows 11
 - **Security Level:** Read-only, PII-minimized, production-grade
 
-**Current ATLAS+S Phase:**
-- ✅ **A — Architect** (complete)
-- ✅ **T — Trace** (complete)
-- ✅ **L — Link** (complete)
+**Current CITADEL Phase:**
+- ✅ **C — Conceive** (complete)
+- ✅ **I — Inventory** (complete)
+- ✅ **T — Tie** (complete)
 - ✅ **A — Assemble** (complete — server is live and working in Claude Desktop)
-- ⏳ **S — Stress-test** (upcoming)
-- ⏳ **S — Secure** (upcoming)
-- ⏳ **M — Monitor** (upcoming)
+- ⏳ **D — Drill** (upcoming)
+- ⏳ **E — Enforce** (upcoming)
+- ⏳ **L — Look** (upcoming)
 
 ---
 
@@ -61,15 +61,17 @@ structlog==25.5.0
 Example: `https://api.servicetitan.io/settings/v2/tenant/12345/technicians`
 
 ### Confirmed Endpoints
-| Resource     | Module     | Path              | Key Params                                      |
-|--------------|------------|-------------------|-------------------------------------------------|
-| Technicians  | `settings` | `/technicians`    | `active=true`                                   |
-| Jobs         | `jpm`      | `/jobs`           | `technicianId`, `completedOnOrAfter`, `completedBefore` |
-| Appointments | `jpm`      | `/appointments`   | `technicianId`, `startsOnOrAfter`, `startsBefore` |
-| Job Types    | `jpm`      | `/job-types`      | (none — returns all, 31 records)                  |
-| Business Units | `settings` | `/business-units` | (none — returns all, 5 records)                 |
+| Resource       | Module       | Path              | Key Params                                      |
+|----------------|--------------|-------------------|-------------------------------------------------|
+| Technicians    | `settings`   | `/technicians`    | `active=true`                                   |
+| Jobs           | `jpm`        | `/jobs`           | `technicianId`, `completedOnOrAfter`, `completedBefore` |
+| Appointments   | `jpm`        | `/appointments`   | `technicianId`, `startsOnOrAfter`, `startsBefore` |
+| Job Types      | `jpm`        | `/job-types`      | (none — returns all, 31 records)                  |
+| Business Units | `settings`   | `/business-units` | (none — returns all, 5 records)                 |
+| Invoices       | `accounting` | `/invoices`       | `invoiceDateOnOrAfter`, `invoiceDateBefore`, `modifiedOnOrAfter` |
+| Tag Types      | `settings`   | `/tag-types`      | (none — returns all, 100+ records)              |
 
-> **Unavailable endpoints** (404): `payroll/jobs`, `timetracking/timesheets`, `jpm/time-entries`, `dispatch/timeclock`. No actual clock-in/out data is available via the API.
+> **Unavailable endpoints** (404): `payroll/jobs`, `timetracking/timesheets`, `jpm/time-entries`, `dispatch/timeclock`, `jpm/job-history`, `jpm/estimates`, `dispatch/appointment-history`, `accounting/invoice-items`, `settings/job-cancel-reasons`, `jpm/appointment-assignments`. No actual clock-in/out data or job audit trails are available via the API.
 
 ### Required Headers (every request)
 ```
@@ -101,12 +103,18 @@ All stored in `.env` in the project root. Loaded by `config.py` using pydantic-s
 ```
 servicetitan-mcp-server/
 ├── CLAUDE.md                       # Security standards (framework)
-├── BUILD_APP.md                    # ATLAS+S workflow (framework)
+├── BUILD_APP.md                    # CITADEL workflow (framework)
 ├── CLAUDE.project.md               # This file — project-specific config
 ├── README.md                       # Setup and usage instructions
-├── servicetitan_mcp_server.py      # MCP server — 11 tools exposed
+├── servicetitan_mcp_server.py      # Entry point — imports tool modules, runs MCP
+├── server_config.py                # Shared MCP instance, settings, logging
+├── shared_helpers.py               # PII scrubbing, API helpers, formatters
+├── tools_jobs.py                   # 4 job tools (@mcp.tool registered at import)
+├── tools_revenue.py                # 5 revenue tools
+├── tools_schedule.py               # 2 schedule tools
+├── tools_analysis.py               # 4 analysis tools
 ├── servicetitan_client.py          # ServiceTitan OAuth + API client
-├── query_validator.py              # Pydantic input validation
+├── query_validator.py              # Pydantic input validation (8 models)
 ├── config.py                       # Settings loaded from .env
 ├── logging_config.py               # structlog JSON logging + PII scrub
 ├── requirements.txt                # Production dependencies (pinned)
@@ -120,27 +128,36 @@ servicetitan-mcp-server/
 └── venv/                           # gitignored
 ```
 
+**Module dependency chain (no circular imports):**
+```
+server_config.py → shared_helpers.py → tools_*.py → servicetitan_mcp_server.py
+```
+
 **Planned but not yet built:**
 - `tests/` — unit and integration tests
 - `cache.py` — optional Redis caching
 
 ---
 
-## MCP Tools (11 live)
+## MCP Tools (15 live)
 
-| Tool | Description | Key Params |
-|------|-------------|------------|
-| `list_technicians` | List active technicians | `name_filter` (optional) |
-| `get_technician_jobs` | Job counts for one tech | `technician_name`, `start_date`, `end_date` |
-| `get_jobs_summary` | Overall job counts across all techs | `start_date`, `end_date` |
-| `get_jobs_by_type` | Job records filtered by type, with all assigned techs | `job_types`, `start_date`, `end_date`, `technician_name`, `status` |
-| `get_technician_revenue` | Revenue breakdown for one tech | `technician_name`, `start_date`, `end_date` |
-| `get_revenue_summary` | Business-wide revenue totals | `start_date`, `end_date` |
-| `get_no_charge_jobs` | Count and % of no-charge jobs | `start_date`, `end_date` |
-| `compare_technicians` | Leaderboard: jobs, revenue, $/job | `start_date`, `end_date` |
-| `get_technician_schedule` | Day-by-day appointment schedule | `technician_name`, `start_date`, `end_date` |
-| `compare_technician_hours` | Scheduled hours + earliest start per tech | `start_date`, `end_date` |
-| `get_revenue_trend` | Avg $/job by job type or BU, monthly trend | `group_by`, `start_date`, `end_date` |
+| Tool | Module | Description | Key Params |
+|------|--------|-------------|------------|
+| `list_technicians` | `tools_jobs` | List active technicians | `name_filter` (optional) |
+| `get_technician_jobs` | `tools_jobs` | Job counts for one tech | `technician_name`, `start_date`, `end_date` |
+| `get_jobs_summary` | `tools_jobs` | Overall job counts across all techs | `start_date`, `end_date` |
+| `get_jobs_by_type` | `tools_jobs` | Job records filtered by type, with all assigned techs | `job_types`, `start_date`, `end_date`, `technician_name`, `status` |
+| `get_technician_revenue` | `tools_revenue` | Revenue breakdown for one tech | `technician_name`, `start_date`, `end_date` |
+| `get_revenue_summary` | `tools_revenue` | Business-wide revenue totals | `start_date`, `end_date` |
+| `get_no_charge_jobs` | `tools_revenue` | Count and % of no-charge jobs | `start_date`, `end_date` |
+| `compare_technicians` | `tools_revenue` | Leaderboard: jobs, revenue, $/job | `start_date`, `end_date` |
+| `get_revenue_trend` | `tools_revenue` | Avg $/job by job type or BU, monthly trend | `group_by`, `start_date`, `end_date` |
+| `get_technician_schedule` | `tools_schedule` | Day-by-day appointment schedule | `technician_name`, `start_date`, `end_date` |
+| `compare_technician_hours` | `tools_schedule` | Scheduled hours + earliest start per tech | `start_date`, `end_date` |
+| `get_technician_job_mix` | `tools_analysis` | Per-tech job breakdown by type with revenue | `technician_name`, `start_date`, `end_date` |
+| `compare_technician_job_mix` | `tools_analysis` | All techs × all job types comparison matrix | `job_type`, `start_date`, `end_date` |
+| `get_cancellations` | `tools_analysis` | Canceled jobs with timing and tags | `technician_name`, `late_only`, `start_date`, `end_date` |
+| `get_technician_discounts` | `tools_analysis` | Discount/credit tracking per tech from invoices | `technician_name`, `min_discount_amount`, `start_date`, `end_date` |
 
 **Default date range:** Last full Monday–Sunday week (when no dates given).
 **Schedule tools note:** Show scheduled appointment hours, not actual clock-in/out (unavailable via API).
@@ -167,7 +184,7 @@ servicetitan-mcp-server/
 - Revenue totals (aggregated)
 
 ### Error Handling
-- User-facing errors are sanitized (`_user_friendly_error`)
+- User-facing errors are sanitized (`user_friendly_error` in `shared_helpers.py`)
 - Internal exception details go to server logs only
 - No stack traces exposed to users
 
@@ -238,13 +255,14 @@ pytest tests/ -v
 Follow the "Five Levels" principle (Simon Willison) — current server is Level 2.
 Level 3 would add comparison context (e.g., "20% above average").
 
-1. **Define the tool** in `servicetitan_mcp_server.py` with `@mcp.tool()`
+1. **Create or edit a tool module** (`tools_jobs.py`, `tools_revenue.py`, `tools_schedule.py`, or `tools_analysis.py`) — use `@mcp.tool()` decorator
 2. **Add validation** in `query_validator.py`
-3. **Add API method** in `servicetitan_client.py` (GET only)
+3. **Add shared helpers** in `shared_helpers.py` if needed (PII scrubbing, formatters)
 4. **Scrub PII** before returning any data
-5. **Update README.md** with the new tool
-6. **Update this file** if new endpoints or env vars are needed
-7. **Write tests** in `tests/`
+5. **Import the tool module** in `servicetitan_mcp_server.py` if it's a new file
+6. **Update README.md** with the new tool
+7. **Update this file** if new endpoints or env vars are needed
+8. **Write tests** in `tests/`
 
 ---
 
@@ -279,6 +297,25 @@ This is non-negotiable. Documentation drift causes confusion across sessions.
 
 ## Changelog
 
+### 2026-02-20 — Module Refactor + 4 New Analysis Tools
+- **Refactored** monolithic `servicetitan_mcp_server.py` (1,600 lines) into focused modules:
+  - `server_config.py` — shared MCP instance, settings, logging
+  - `shared_helpers.py` — PII scrubbing, API helpers, formatters
+  - `tools_jobs.py` — 4 job tools
+  - `tools_revenue.py` — 5 revenue tools
+  - `tools_schedule.py` — 2 schedule tools
+  - `tools_analysis.py` — 4 new analysis tools
+  - `servicetitan_mcp_server.py` — entry point only (~60 lines)
+- **Added** `get_technician_job_mix` — per-tech job breakdown by type with revenue/avg stats
+- **Added** `compare_technician_job_mix` — all techs x all job types matrix with company avg and variance
+- **Added** `get_cancellations` — canceled jobs with timing, late-cancel detection, tag-based reason proxy
+- **Added** `get_technician_discounts` — invoice discount tracking via negative line items, PII-safe
+- **Added** 3 new validators: `JobMixCompareQuery`, `CancellationQuery`, `DiscountQuery`
+- **Probed** and confirmed: `accounting/invoices`, `settings/tag-types`
+- **Confirmed unavailable** (404): `jpm/job-history`, `jpm/estimates`, `dispatch/appointment-history`, `accounting/invoice-items`, `settings/job-cancel-reasons`, `jpm/appointment-assignments`
+- **Expanded** `_SAFE_JOB_FIELDS` with: `recallForId`, `invoiceId`, `tagTypeIds`, `firstAppointmentId`
+- Tool count: 11 → 15
+
 ### 2026-02-19 — Revenue Trend Tool
 - Added `get_revenue_trend` — avg $/job by job type or business unit, monthly breakdown
 - Probed and confirmed `jpm/job-types` (31 records) and `settings/business-units` (5 records)
@@ -309,7 +346,7 @@ This is non-negotiable. Documentation drift causes confusion across sessions.
 - Confirmed UWP config path: `%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\`
 
 ### 2026-02-18 — Project Initialization
-- Created project structure per ATLAS+S workflow
+- Created project structure per CITADEL workflow
 - Defined security architecture (OAuth, PII minimization, rate limiting)
 
 ---
