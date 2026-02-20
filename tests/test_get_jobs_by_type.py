@@ -1,9 +1,7 @@
-import asyncio
-from datetime import date
 
 import pytest
 
-from servicetitan_mcp_server import get_jobs_by_type, _scrub_job
+from tools_jobs import get_jobs_by_type
 from query_validator import JobsByTypeQuery
 
 
@@ -18,7 +16,7 @@ class DummyClient:
         return False
 
     async def get(self, module, path, params=None):
-        # This dummy is not used directly by tests which patch _fetch_all_pages
+        # This dummy is not used directly by tests which patch fetch_all_pages
         return {"data": []}
 
 
@@ -63,7 +61,7 @@ async def test_get_jobs_by_type_filters_and_output(monkeypatch):
             return fake_bus
         return []
 
-    monkeypatch.setattr("servicetitan_mcp_server._fetch_all_pages", fake_fetch_all_pages)
+    monkeypatch.setattr("tools_jobs.fetch_all_pages", fake_fetch_all_pages)
 
     # Call the tool to request GO BACK jobs only
     out = await get_jobs_by_type("GO BACK", start_date="2025-11-22", end_date="2026-02-19")

@@ -139,7 +139,7 @@ async def get_technician_schedule(
                 dur = appt_duration_hours(a)
                 lines.append(f"    {t_start} → {t_end}  ({fmt_hours(dur)})")
 
-        lines.append(f"\n(Times are UTC — scheduled, not actual clock-in/out)")
+        lines.append("\n(Times are UTC — scheduled, not actual clock-in/out)")
         return "\n".join(lines)
 
     except Exception as exc:
@@ -260,7 +260,7 @@ async def compare_technician_hours(
         lines.append(
             f"{'TOTAL':<{name_w}}  {total_appts:>5}  {fmt_hours(total_hours):>11}"
         )
-        lines.append(f"\n(Scheduled appointment hours — not actual clock-in/out)")
+        lines.append("\n(Scheduled appointment hours — not actual clock-in/out)")
 
         return "\n".join(lines)
 

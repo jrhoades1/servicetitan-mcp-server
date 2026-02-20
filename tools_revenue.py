@@ -4,7 +4,6 @@ compare_technicians, get_revenue_trend.
 """
 from __future__ import annotations
 
-from datetime import date
 
 import structlog
 from pydantic import ValidationError

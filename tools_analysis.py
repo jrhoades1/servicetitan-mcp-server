@@ -181,7 +181,7 @@ async def get_technician_job_mix(
         top_rev = max(rows, key=lambda x: x[1]["revenue"])
 
         lines.append(sep)
-        lines.append(f"Summary:")
+        lines.append("Summary:")
         lines.append(f"  {total_jobs} total jobs  |  {total_billed} billed  |  {total_jobs - total_billed} no-charge")
         lines.append(f"  {fmt_currency(total_revenue)} total revenue  |  {fmt_currency(overall_avg)} avg/billed job")
         lines.append(f"  {unique_types} unique job types")
@@ -552,7 +552,7 @@ async def get_cancellations(
             if e["hours_before"] is not None:
                 h = e["hours_before"]
                 if h < 0:
-                    lines.append(f"  Notice: canceled after scheduled time")
+                    lines.append("  Notice: canceled after scheduled time")
                 elif h < 1:
                     lines.append(f"  Notice: {h * 60:.0f} min before appointment (LATE)")
                 elif h <= 24:

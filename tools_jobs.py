@@ -16,7 +16,6 @@ from shared_helpers import (
     format_date_range,
     count_jobs_by_status,
     count_no_charge,
-    sum_revenue,
     fmt_currency,
     fetch_jobs_params,
     fetch_appt_params,

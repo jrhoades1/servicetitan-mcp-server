@@ -19,11 +19,11 @@ from dotenv import load_dotenv
 # sets the working directory when it launches this process.
 load_dotenv(Path(__file__).parent / ".env")
 
-import structlog
-from mcp.server.fastmcp import FastMCP
+import structlog  # noqa: E402
+from mcp.server.fastmcp import FastMCP  # noqa: E402
 
-from config import get_settings
-from logging_config import configure_logging
+from config import get_settings  # noqa: E402
+from logging_config import configure_logging  # noqa: E402
 
 settings = get_settings()
 

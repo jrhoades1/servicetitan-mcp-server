@@ -19,7 +19,6 @@ from datetime import date, datetime, timedelta
 import structlog
 from pydantic import ValidationError
 
-from server_config import settings
 from servicetitan_client import (
     ServiceTitanAPIError,
     ServiceTitanAuthError,
