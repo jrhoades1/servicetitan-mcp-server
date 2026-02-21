@@ -243,3 +243,131 @@ class DiscountQuery(DateRangeQuery):
         if v and not _NAME_PATTERN.match(v):
             raise ValueError("Technician name may only contain letters, spaces, and hyphens")
         return v
+
+
+class RecallQuery(DateRangeQuery):
+    """
+    Validated input for get_recalls.
+
+    Optional filters for recall technician name and business unit.
+    """
+
+    technician_name: str | None = Field(default=None, max_length=100)
+    business_unit: str | None = Field(default=None, max_length=100)
+
+    @field_validator("technician_name", "business_unit")
+    @classmethod
+    def _validate_name_fields(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        v = v.strip()
+        if v and not _NAME_PATTERN.match(v):
+            raise ValueError("Field may only contain letters, spaces, and hyphens")
+        return v if v else None
+
+
+class CallbackChainQuery(DateRangeQuery):
+    """
+    Validated input for get_callback_chains.
+
+    technician_name filters by the ORIGINAL job's technician.
+    min_chain_length: only show chains with this many total visits (original + recalls).
+    """
+
+    technician_name: str | None = Field(default=None, max_length=100)
+    min_chain_length: int = Field(default=2, ge=2, le=10)
+
+    @field_validator("technician_name")
+    @classmethod
+    def _validate_technician_name(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        v = v.strip()
+        if v and not _NAME_PATTERN.match(v):
+            raise ValueError("Technician name may only contain letters, spaces, and hyphens")
+        return v if v else None
+
+
+class RecallSummaryQuery(DateRangeQuery):
+    """
+    Validated input for get_recall_summary.
+
+    group_by: how to slice the recall rate breakdown.
+    """
+
+    group_by: str = Field(default="technician")
+
+    @field_validator("group_by")
+    @classmethod
+    def _validate_group_by(cls, v: str) -> str:
+        allowed = {"technician", "business_unit", "job_type"}
+        v = v.strip().lower()
+        if v not in allowed:
+            raise ValueError(
+                f"group_by must be one of: {', '.join(sorted(allowed))}"
+            )
+        return v
+
+
+class JobsByTagQuery(DateRangeQuery):
+    """
+    Validated input for get_jobs_by_tag.
+
+    tag_names: required comma-separated tag names (resolved to IDs server-side).
+    """
+
+    tag_names: str = Field(..., min_length=1, max_length=300)
+    technician_name: str | None = Field(default=None, max_length=100)
+
+    @field_validator("tag_names")
+    @classmethod
+    def _validate_tag_names(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("tag_names cannot be empty — provide one or more tag names")
+        return v
+
+    @field_validator("technician_name")
+    @classmethod
+    def _validate_technician_name(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        v = v.strip()
+        if v and not _NAME_PATTERN.match(v):
+            raise ValueError("Technician name may only contain letters, spaces, and hyphens")
+        return v if v else None
+
+
+class SummarySearchQuery(DateRangeQuery):
+    """
+    Validated input for search_job_summaries.
+
+    search_text: required substring to match (case-insensitive).
+    Job summaries may contain customer PII — results are flagged with a disclaimer.
+    """
+
+    search_text: str = Field(..., min_length=2, max_length=200)
+    technician_name: str | None = Field(default=None, max_length=100)
+    job_type: str | None = Field(default=None, max_length=100)
+
+    @field_validator("search_text")
+    @classmethod
+    def _validate_search_text(cls, v: str) -> str:
+        return v.strip()
+
+    @field_validator("technician_name")
+    @classmethod
+    def _validate_technician_name(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        v = v.strip()
+        if v and not _NAME_PATTERN.match(v):
+            raise ValueError("Technician name may only contain letters, spaces, and hyphens")
+        return v if v else None
+
+    @field_validator("job_type")
+    @classmethod
+    def _validate_job_type(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        return v.strip() or None

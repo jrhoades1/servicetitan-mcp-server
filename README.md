@@ -21,6 +21,11 @@ Ask Claude natural language questions about technician jobs and business perform
 "Compare all technicians by job type for the last 90 days."
 "How many cancellations were there last month? How many were late?"
 "Show discount activity for last month."
+"Show all recall jobs for the last 90 days."
+"How many GO BACKs were true recalls vs Set Test jobs last month?"
+"What is our recall rate by technician? Who is causing the most rework?"
+"Show me all jobs tagged Set Test for the last 90 days."
+"Search job summaries for 'FG going' for last month."
 ```
 
 ## How It Works
@@ -125,7 +130,7 @@ In a new chat, you should see the tools indicator (⚡ or a hammer icon) confirm
 
 ---
 
-## Available Tools (15 total)
+## Available Tools (20 total)
 
 ### Job Tools
 
@@ -211,6 +216,33 @@ Canceled job records with timing analysis — how far in advance each was cancel
 Discount and credit activity per technician from invoices. Detects discounts via negative line items. Shows discount count, total amount, and common SKUs.
 
 **Parameters:** `technician_name` (optional), `min_discount_amount` (optional), `start_date`, `end_date`
+
+### Recall Tools
+
+#### `get_recalls`
+Jobs where `recallForId` is not null — these are true ServiceTitan recalls booked via the "Recall..." job action. Shows each recall with its original job (or notes if outside the date range), days between original and recall, and the job summary with a PII warning.
+
+**Parameters:** `technician_name` (optional — filters by recall tech), `business_unit` (optional), `start_date`, `end_date`
+
+#### `get_callback_chains`
+Groups recall jobs by their original job to show full callback chains. Shows how many truck rolls each chain required and the opportunity cost (recall visits × average revenue per job). Useful for identifying which jobs are generating repeat visits.
+
+**Parameters:** `technician_name` (optional — filters by original job tech), `min_chain_length` (default 2 — minimum total visits to show), `start_date`, `end_date`
+
+#### `get_recall_summary`
+Recall rate breakdown by technician, business unit, or job type — attributed to the original job's tech/BU (who caused the rework). Shows recall rate %, average days to recall, and opportunity cost. Includes a GO BACK classification block separating true recalls from Set Test jobs and unclassified GO BACKs.
+
+**Parameters:** `group_by` ("technician", "business_unit", or "job_type"), `start_date`, `end_date`
+
+#### `get_jobs_by_tag`
+Jobs filtered by tag name(s). Tag names are resolved to IDs client-side (case-insensitive). If a tag name isn't found, lists all available tags. Useful for finding "Set Test", "CC on FILE", or any other tagged jobs.
+
+**Parameters:** `tag_names` (comma-separated names, required), `technician_name` (optional), `start_date`, `end_date`
+
+#### `search_job_summaries`
+Case-insensitive text search across job summary notes. Always shows a PII warning — summaries are free-text entered by dispatchers and may contain customer names or contact info. Returns up to 50 matches.
+
+**Parameters:** `search_text` (required, minimum 2 characters), `technician_name` (optional), `job_type` (optional), `start_date`, `end_date`
 
 ---
 

@@ -5,7 +5,7 @@ Exposes ServiceTitan business data to Claude Desktop via the Model Context Proto
 All data returned is aggregated and PII-free — no customer names, addresses, or
 contact details are ever sent to Claude.
 
-Tools exposed (15 total):
+Tools exposed (20 total):
   Job Tools:
     list_technicians          — list active technicians by name
     get_technician_jobs       — job counts for a technician over a date range
@@ -29,6 +29,13 @@ Tools exposed (15 total):
     get_cancellations         — canceled job records with timing and tags
     get_technician_discounts  — discount/credit tracking per technician from invoices
 
+  Recall Tools:
+    get_recalls               — jobs where recallForId is not null (true ServiceTitan recalls)
+    get_callback_chains       — recall chains grouped by original job; truck rolls + cost
+    get_recall_summary        — recall rate by tech/BU/job_type with opportunity cost
+    get_jobs_by_tag           — filter jobs by tag name(s); resolves names to IDs
+    search_job_summaries      — text search across job summary field (PII-flagged)
+
 Run this script directly (stdio transport for Claude Desktop):
   python servicetitan_mcp_server.py
 
@@ -48,6 +55,7 @@ import tools_jobs  # noqa: F401
 import tools_revenue  # noqa: F401
 import tools_schedule  # noqa: F401
 import tools_analysis  # noqa: F401
+import tools_recall  # noqa: F401
 
 
 if __name__ == "__main__":

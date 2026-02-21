@@ -61,8 +61,9 @@ _SAFE_JOB_FIELDS = frozenset(
         "appointmentCount",
         "noCharge",
         "recallForId",      # Internal numeric job ID — links GO BACKs to originals
+        "warrantyId",       # Internal numeric job ID — warranty recall jobs
         "invoiceId",        # Internal numeric invoice ID — for discount linkage
-        "tagTypeIds",       # Tag IDs — used for cancel reason proxy
+        "tagTypeIds",       # Tag IDs — used for cancel reason proxy and recall classification
         "firstAppointmentId",  # Used for cancel timing calculation
     }
 )

@@ -113,8 +113,9 @@ servicetitan-mcp-server/
 ├── tools_revenue.py                # 5 revenue tools
 ├── tools_schedule.py               # 2 schedule tools
 ├── tools_analysis.py               # 4 analysis tools
+├── tools_recall.py                 # 5 recall tools
 ├── servicetitan_client.py          # ServiceTitan OAuth + API client
-├── query_validator.py              # Pydantic input validation (8 models)
+├── query_validator.py              # Pydantic input validation (13 models)
 ├── config.py                       # Settings loaded from .env
 ├── logging_config.py               # structlog JSON logging + PII scrub
 ├── requirements.txt                # Production dependencies (pinned)
@@ -139,7 +140,7 @@ server_config.py → shared_helpers.py → tools_*.py → servicetitan_mcp_serve
 
 ---
 
-## MCP Tools (15 live)
+## MCP Tools (20 live)
 
 | Tool | Module | Description | Key Params |
 |------|--------|-------------|------------|
@@ -158,6 +159,11 @@ server_config.py → shared_helpers.py → tools_*.py → servicetitan_mcp_serve
 | `compare_technician_job_mix` | `tools_analysis` | All techs × all job types comparison matrix | `job_type`, `start_date`, `end_date` |
 | `get_cancellations` | `tools_analysis` | Canceled jobs with timing and tags | `technician_name`, `late_only`, `start_date`, `end_date` |
 | `get_technician_discounts` | `tools_analysis` | Discount/credit tracking per tech from invoices | `technician_name`, `min_discount_amount`, `start_date`, `end_date` |
+| `get_recalls` | `tools_recall` | True recall jobs (recallForId set) with original job lookup | `technician_name`, `business_unit`, `start_date`, `end_date` |
+| `get_callback_chains` | `tools_recall` | Recall chains grouped by original job; truck rolls + opportunity cost | `technician_name`, `min_chain_length`, `start_date`, `end_date` |
+| `get_recall_summary` | `tools_recall` | Recall rate by tech/BU/job_type with opportunity cost | `group_by`, `start_date`, `end_date` |
+| `get_jobs_by_tag` | `tools_recall` | Jobs filtered by tag name(s); names resolved to IDs | `tag_names`, `technician_name`, `start_date`, `end_date` |
+| `search_job_summaries` | `tools_recall` | Text search across job summary field (PII-flagged) | `search_text`, `technician_name`, `job_type`, `start_date`, `end_date` |
 
 **Default date range:** Last full Monday–Sunday week (when no dates given).
 **Schedule tools note:** Show scheduled appointment hours, not actual clock-in/out (unavailable via API).
@@ -255,7 +261,7 @@ pytest tests/ -v
 Follow the "Five Levels" principle (Simon Willison) — current server is Level 2.
 Level 3 would add comparison context (e.g., "20% above average").
 
-1. **Create or edit a tool module** (`tools_jobs.py`, `tools_revenue.py`, `tools_schedule.py`, or `tools_analysis.py`) — use `@mcp.tool()` decorator
+1. **Create or edit a tool module** (`tools_jobs.py`, `tools_revenue.py`, `tools_schedule.py`, `tools_analysis.py`, or `tools_recall.py`) — use `@mcp.tool()` decorator
 2. **Add validation** in `query_validator.py`
 3. **Add shared helpers** in `shared_helpers.py` if needed (PII scrubbing, formatters)
 4. **Scrub PII** before returning any data
@@ -296,6 +302,18 @@ This is non-negotiable. Documentation drift causes confusion across sessions.
 ---
 
 ## Changelog
+
+### 2026-02-20 — Recall Tracking (5 New Tools, 15 → 20)
+- **Added** `tools_recall.py` — new module with 5 recall and tag tools
+- **Added** `get_recalls` — jobs where `recallForId` is not null; looks up original job by ID; shows days-to-recall and summary with PII warning
+- **Added** `get_callback_chains` — groups recalls by original job; calculates truck rolls and opportunity cost (N recalls × avg $/job)
+- **Added** `get_recall_summary` — recall rate by tech/BU/job_type; GO BACK classification block (true recalls vs Set Test vs unclassified); overall rate and opportunity cost
+- **Added** `get_jobs_by_tag` — resolves tag names to IDs client-side; filters jobs by any matching tag; lists available tags on lookup failure
+- **Added** `search_job_summaries` — case-insensitive substring search across `summary` field; max 50 results; always shows PII warning header
+- **Added** 5 validators: `RecallQuery`, `CallbackChainQuery`, `RecallSummaryQuery`, `JobsByTagQuery`, `SummarySearchQuery`
+- **Added** `warrantyId` to `_SAFE_JOB_FIELDS` (internal numeric ID, same class as `recallForId`)
+- **Design decisions:** `summary` accessed from raw records (never via `scrub_job()`); recall rate attributed to original job's tech/BU (who caused the rework); chain matching via `recallForId` only (no locationId heuristic)
+- Tool count: 15 → 20
 
 ### 2026-02-20 — Module Refactor + 4 New Analysis Tools
 - **Refactored** monolithic `servicetitan_mcp_server.py` (1,600 lines) into focused modules:
