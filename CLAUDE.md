@@ -103,10 +103,44 @@ cross-reference the Anthropic Console filtered by the project's API key for exac
 
 ---
 
+## Requirements Management
+
+Each project has a `requirements/` directory containing structured specs as markdown files
+with YAML frontmatter. This is the spec pipeline — structured requirements that Claude
+can read and implement autonomously.
+
+### How it works
+- **One file per requirement:** `requirements/REQ-NNN-short-slug.md`
+- **YAML frontmatter:** machine-parseable metadata (status, priority, dates, author)
+- **Markdown body:** Problem, Solution, Acceptance Criteria, Technical Notes, Decision Log
+- **Per-project workflow:** `requirements/_workflow.yml` defines statuses and transitions
+
+### Who creates requirements
+- **Jimmy** writes requirements for features, changes, and bug fixes
+- **Claude** can propose requirements (`status: proposed`, `author: claude`) when noticing
+  gaps or improvements — but does NOT implement until Jimmy approves
+- Nothing moves from `proposed` to `approved` without Jimmy's sign-off
+
+### Using requirements
+- Before starting work, check `requirements/` for existing specs
+- To implement: "implement REQ-003" — Claude reads the spec, builds it, checks off criteria
+- Claude updates status dates and Decision Log as work progresses
+- See `FINAL_REQUIREMENTS_TEMPLATE.md` for the full file format and field reference
+
+### Cross-project report
+```bash
+python C:\Users\Tracy\Projects\claude-tracking\req_report.py
+python C:\Users\Tracy\Projects\claude-tracking\req_report.py --project ALD-SERVICETITAN
+python C:\Users\Tracy\Projects\claude-tracking\req_report.py --status proposed --detail
+```
+
+---
+
 ## Documentation to Reference
 
 Before starting work in any project, check for these files (paths may vary by repo):
 
+- `requirements/` — structured requirements (check for specs before building)
 - `docs/STORAGE_MANAGER.md` — how persistent data and user assets are handled
 - `docs/ADDING_ASSETS.md` — adding new images, videos, fonts, etc.
 - `docs/COMPONENT_PATTERNS.md` — standard component structures and naming

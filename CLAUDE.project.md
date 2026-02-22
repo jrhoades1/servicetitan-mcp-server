@@ -126,6 +126,10 @@ servicetitan-mcp-server/
 ├── .env                            # Real credentials (NEVER COMMIT)
 ├── .env.example                    # Safe template (committed)
 ├── .gitignore
+├── requirements/                   # Structured requirements (specs for Claude to implement)
+│   ├── _workflow.yml               # Statuses, transitions, permissions
+│   ├── README.md                   # How to use requirements in this project
+│   └── REQ-NNN-slug.md            # Individual requirement files
 ├── logs/
 │   ├── .gitkeep
 │   └── mcp_server.log              # gitignored
@@ -263,6 +267,10 @@ pytest tests/ -v
 
 Follow the "Five Levels" principle (Simon Willison) — current server is Level 2.
 Level 3 would add comparison context (e.g., "20% above average").
+
+**Before building:** Check `requirements/` for an existing spec. If one exists, implement
+against it and update its status. If not, create a `REQ-NNN-slug.md` first (see
+`requirements/README.md` for the format).
 
 1. **Create or edit a tool module** (`tools_jobs.py`, `tools_revenue.py`, `tools_schedule.py`, `tools_analysis.py`, or `tools_recall.py`) — use `@mcp.tool()` decorator
 2. **Add validation** in `query_validator.py`

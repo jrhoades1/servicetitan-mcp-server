@@ -1,0 +1,36 @@
+# Requirements workflow configuration — ServiceTitan MCP Server
+# Customize statuses and transitions per project as needed.
+
+statuses:
+  proposed:     "Initial idea or request — needs review"
+  approved:     "Accepted for implementation"
+  rejected:     "Not doing this (reason in decision field)"
+  deferred:     "Good idea but not now"
+  scheduled:    "Assigned to a sprint or week"
+  in_progress:  "Currently being built"
+  implemented:  "Code complete, needs verification"
+  verified:     "Tested and confirmed working"
+
+transitions:
+  proposed:     [approved, rejected, deferred]
+  approved:     [scheduled, deferred]
+  deferred:     [approved, rejected]
+  scheduled:    [in_progress]
+  in_progress:  [implemented, deferred]
+  implemented:  [verified, in_progress]
+
+# Permissions
+approval_required:
+  - "proposed -> approved"
+  - "proposed -> rejected"
+
+claude_can_do:
+  - "create proposed requirements"
+  - "move scheduled -> in_progress (when starting work)"
+  - "move in_progress -> implemented (when code is complete)"
+  - "add entries to Decision Log"
+
+jimmy_only:
+  - "approve or reject proposed requirements"
+  - "set priority on any requirement"
+  - "move implemented -> verified (end-user sign-off)"
