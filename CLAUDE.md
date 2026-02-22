@@ -40,6 +40,38 @@ This is a TypeScript-based project. All code must prioritize:
 
 ---
 
+## Cost Tracking & Client Billing
+
+Every Claude Code CLI session is automatically logged to
+`C:\Users\Tracy\Projects\claude-tracking\sessions.csv` via a global Stop hook
+in `~/.claude/settings.json`. Each project must have `.claude/project-code.txt`
+for accurate attribution.
+
+### Setup for a new billable project
+1. Create `.claude/project-code.txt` in the project root with one line: the project code
+2. (Optional) Add a project-specific `ANTHROPIC_API_KEY` to `.env` for exact API cost tracking
+3. Add the project code to the table below
+
+### Active project codes
+| Code | Project | Client | Billing method |
+|------|---------|--------|----------------|
+| ALD-SERVICETITAN | ServiceTitan MCP Server | American Leak Detection | Retainer |
+
+### Rate card
+Update with your actual rates before billing:
+- **Retainer / internal projects:** Included in monthly fee — log tokens for internal allocation
+- **Billable API work:** check Anthropic Console (filter by project API key) for exact USD
+- **Billable subscription work:** session count × your internal hourly/session rate
+
+### Generating a monthly invoice line item
+```bash
+python C:\Users\Tracy\Projects\claude-tracking\report.py --month YYYY-MM
+```
+Output lists sessions and tokens by project. For API-billed projects, cross-reference
+the Anthropic Console filtered by the project's API key for exact USD cost.
+
+---
+
 ## Documentation to Reference
 
 Before starting work in any project, check for these files (paths may vary by repo):

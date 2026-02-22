@@ -13,6 +13,8 @@
 - **End User:** Jimmy's wife (business owner, non-technical)
 - **Deployment:** Local — Claude Desktop on Windows 11
 - **Security Level:** Read-only, PII-minimized, production-grade
+- **Project Code:** `ALD-SERVICETITAN` (used by Claude Code billing hook)
+- **Billing:** Included in ALD retainer — tokens logged for internal allocation only
 
 **Current CITADEL Phase:**
 - ✅ **C — Conceive** (complete)
