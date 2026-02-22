@@ -15,6 +15,7 @@
 - **Security Level:** Read-only, PII-minimized, production-grade
 - **Project Code:** `ALD-SERVICETITAN` (used by Claude Code billing hook)
 - **Billing:** Included in ALD retainer — tokens logged for internal allocation only
+- **Expense Tracking:** `.claude/billing.json` — add hosting, domain, API costs as incurred
 
 **Current CITADEL Phase:**
 - ✅ **C — Conceive** (complete)
