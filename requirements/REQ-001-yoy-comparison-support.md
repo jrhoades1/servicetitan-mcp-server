@@ -1,7 +1,7 @@
 ---
 id: REQ-001
 title: Support year-over-year date ranges and fix compare_technicians empty results
-status: implemented
+status: verified
 priority: high
 author: claude
 requested_by: jimmy
@@ -9,7 +9,7 @@ created: 2026-02-23
 approved: null
 scheduled: 2026-02-23
 implemented: 2026-02-23
-verified: null
+verified: 2026-02-23
 decision: null
 tags: [date-range, compare-technicians, yoy, bug-fix]
 ---
@@ -100,3 +100,4 @@ if len(jobs) == 5000:
 <!-- 2026-02-23 — proposed by claude: discovered during YoY comparison attempt; diagnosed via get_jobs_summary returning 1,000 jobs while compare_technicians returned empty for same range -->
 <!-- 2026-02-23 — in_progress: implementation started by claude -->
 <!-- 2026-02-23 — implemented: all 3 fixes applied — date cap raised to 366, compare_technicians rewritten to per-tech API queries, max_records raised to 5000 with truncation warnings -->
+<!-- 2026-02-23 — verified by jimmy: confirmed via live testing -->
