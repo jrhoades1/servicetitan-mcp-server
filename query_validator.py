@@ -7,7 +7,7 @@ user-friendly message — never a stack trace.
 
 Security rules enforced here:
   - Technician names: letters, spaces, hyphens only (blocks injection attempts)
-  - Date ranges: max 90 days, chronological order
+  - Date ranges: max 366 days, chronological order
   - No raw user strings ever reach a query parameter without passing through here
 """
 from __future__ import annotations
@@ -21,7 +21,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 # Constants
 # ---------------------------------------------------------------------------
 
-_MAX_DATE_RANGE_DAYS = 90
+_MAX_DATE_RANGE_DAYS = 366
 _NAME_PATTERN = re.compile(r"^[A-Za-z\s\-]+$")
 
 
@@ -38,7 +38,7 @@ class DateRangeQuery(BaseModel):
       - If neither start_date nor end_date is given → last full week (Mon–Sun)
       - If only start_date is given → single day
       - If only end_date is given → 7 days ending on end_date
-      - If both are given → that range (max 90 days)
+      - If both are given → that range (max 366 days)
 
     Used directly by: get_revenue_summary, get_no_charge_jobs, compare_technicians.
     Extended by: TechnicianJobQuery (adds technician name).

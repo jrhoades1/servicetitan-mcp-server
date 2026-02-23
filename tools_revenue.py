@@ -91,7 +91,7 @@ async def get_technician_revenue(
                 module="jpm",
                 path="/jobs",
                 params=fetch_jobs_params(start, end, tech_id),
-                max_records=1000,
+                max_records=5000,
             )
 
         total_jobs = len(jobs)
@@ -115,6 +115,9 @@ async def get_technician_revenue(
 
         if total_jobs == 0:
             lines.append("\nNo completed jobs found in this date range.")
+
+        if total_jobs == 5000:
+            lines.append("\n⚠️ Results capped at 5,000 jobs — totals may be incomplete.")
 
         return "\n".join(lines)
 
@@ -156,7 +159,7 @@ async def get_revenue_summary(
                 module="jpm",
                 path="/jobs",
                 params=fetch_jobs_params(start, end),
-                max_records=1000,
+                max_records=5000,
             )
 
         total_jobs = len(jobs)
@@ -176,6 +179,9 @@ async def get_revenue_summary(
 
         if total_jobs == 0:
             lines.append("\nNo completed jobs found in this date range.")
+
+        if total_jobs == 5000:
+            lines.append("\n⚠️ Results capped at 5,000 jobs — totals may be incomplete.")
 
         return "\n".join(lines)
 
@@ -217,7 +223,7 @@ async def get_no_charge_jobs(
                 module="jpm",
                 path="/jobs",
                 params=fetch_jobs_params(start, end),
-                max_records=1000,
+                max_records=5000,
             )
 
         total_jobs = len(jobs)
@@ -234,6 +240,9 @@ async def get_no_charge_jobs(
             lines.append("No completed jobs found in this date range.")
         else:
             lines.append(f"No-charge jobs:  {no_charge} of {total_jobs}  ({pct:.1f}%)")
+
+        if total_jobs == 5000:
+            lines.append("\n⚠️ Results capped at 5,000 jobs — totals may be incomplete.")
 
         return "\n".join(lines)
 
@@ -278,34 +287,35 @@ async def compare_technicians(
                 params={"active": "true"},
                 max_records=500,
             )
-            jobs = await fetch_all_pages(
-                client,
-                module="jpm",
-                path="/jobs",
-                params=fetch_jobs_params(start, end),
-                max_records=1000,
-            )
 
-        tech_names: dict[int, str] = {
-            t["id"]: t.get("name", f"Tech {t['id']}")
-            for t in all_techs
-            if "id" in t
-        }
+            # Query jobs per-tech via API parameter (server-side filter).
+            # The technicianId field on job records is unreliable — many jobs
+            # return null even when assigned. The query parameter uses
+            # appointment-based assignment and works correctly.
+            tech_stats: dict[int, dict] = {}
+            capped = False
 
-        tech_stats: dict[int, dict] = {}
-        unassigned_count = 0
-
-        for job in jobs:
-            tid = job.get("technicianId")
-            if tid is None:
-                unassigned_count += 1
-                continue
-            if tid not in tech_stats:
-                tech_stats[tid] = {"jobs": 0, "revenue": 0.0, "no_charge": 0}
-            tech_stats[tid]["jobs"] += 1
-            tech_stats[tid]["revenue"] += job.get("total") or 0.0
-            if job.get("noCharge"):
-                tech_stats[tid]["no_charge"] += 1
+            for tech in all_techs:
+                tid = tech.get("id")
+                if tid is None:
+                    continue
+                jobs = await fetch_all_pages(
+                    client,
+                    module="jpm",
+                    path="/jobs",
+                    params=fetch_jobs_params(start, end, tid),
+                    max_records=5000,
+                )
+                if not jobs:
+                    continue
+                if len(jobs) == 5000:
+                    capped = True
+                tech_stats[tid] = {
+                    "name": tech.get("name", f"Tech {tid}"),
+                    "jobs": len(jobs),
+                    "revenue": sum_revenue(jobs),
+                    "no_charge": count_no_charge(jobs),
+                }
 
         date_label = format_date_range(start, end)
 
@@ -313,12 +323,12 @@ async def compare_technicians(
             return (
                 f"Technician Comparison  |  {date_label}\n"
                 f"{'─' * 55}\n"
-                "No jobs with assigned technicians found in this date range."
+                "No completed jobs found for any technician in this date range."
             )
 
         rows = sorted(tech_stats.items(), key=lambda x: x[1]["revenue"], reverse=True)
 
-        name_w = max(len(tech_names.get(tid, f"Tech {tid}")) for tid, _ in rows)
+        name_w = max(len(s["name"]) for _, s in rows)
         name_w = max(name_w, 10)
 
         header = f"{'Technician':<{name_w}}  {'Jobs':>5}  {'Revenue':>12}  {'$/Job':>10}  {'No-charge':>9}"
@@ -336,7 +346,7 @@ async def compare_technicians(
         total_no_charge = 0
 
         for tid, stats in rows:
-            name = tech_names.get(tid, f"Tech {tid}")
+            name = stats["name"]
             j = stats["jobs"]
             rev = stats["revenue"]
             nc = stats["no_charge"]
@@ -359,8 +369,8 @@ async def compare_technicians(
             f"{'TOTAL':<{name_w}}  {total_jobs:>5}  {fmt_currency(total_revenue):>12}  {fmt_currency(total_rev_per_job):>10}  {total_no_charge:>9}"
         )
 
-        if unassigned_count:
-            lines.append(f"\n({unassigned_count} jobs had no assigned technician and are excluded)")
+        if capped:
+            lines.append("\n⚠️ Results capped at 5,000 jobs for one or more technicians — totals may be incomplete.")
 
         return "\n".join(lines)
 
