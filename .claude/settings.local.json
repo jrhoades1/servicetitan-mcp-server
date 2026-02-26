@@ -25,10 +25,60 @@
       "Bash(git push:*)",
       "Bash(wc:*)",
       "Bash(git rm:*)",
-      "Bash(./venv/Scripts/python.exe:*)"
+      "Bash(./venv/Scripts/python.exe:*)",
+      "Read(//c/Users/Tracy/Projects/Claude Setup/**)",
+      "Read(//c/Users/Tracy/Downloads/**)",
+      "Bash(source:*)",
+      "Bash(gh run list:*)",
+      "Bash(ruff check:*)",
+      "Bash(pip install:*)",
+      "Bash(pytest:*)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(grep:*)",
+      "Read(//c/Users/Tracy/.claude/**)",
+      "Bash(git init:*)"
     ],
     "additionalDirectories": [
-      "C:\\Users\\Tracy\\AppData\\Local\\Packages\\Claude_pzs8sxrjxfjjc\\LocalCache\\Roaming\\Claude"
+      "C:\\Users\\Tracy\\AppData\\Local\\Packages\\Claude_pzs8sxrjxfjjc\\LocalCache\\Roaming\\Claude",
+      "c:\\Users\\Tracy\\Projects\\Claude Setup",
+      "C:\\Users\\Tracy\\Projects",
+      "C:\\Users\\Tracy\\.claude"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 hooks/memory_capture.py",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 hooks/guardrail_check.py"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 hooks/validate_output.py"
+          }
+        ]
+      }
     ]
   }
 }

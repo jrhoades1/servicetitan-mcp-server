@@ -21,3 +21,9 @@ logs/*.log
 # IDE
 .vscode/
 .idea/
+
+# DSF runtime data
+data/*.db
+data/*.db-journal
+memory/logs/
+.tmp/
