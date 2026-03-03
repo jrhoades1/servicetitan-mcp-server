@@ -27,3 +27,15 @@ data/*.db
 data/*.db-journal
 memory/logs/
 .tmp/
+# Claude Code runtime (machine-specific)
+.claude/settings.local.json
+.claude/billing.json
+.claude/project-code.txt
+
+# Additional caches
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+# Windows
+desktop.ini
