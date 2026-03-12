@@ -42,6 +42,12 @@
 - **Pool avg ticket:** $454
 - **Analysis files:** analysis/ directory (comp case, optimization, Ken briefs, pool vs house)
 
+## Data Quality Caveats (ST vs QuickBooks)
+- **Revenue per tech is overstated in ST** — job reassignments inflate/deflate individual numbers. Example: Tom showed $119k in ST but $98k in QB (~21% gap). QB is source of truth.
+- **Tech hours are undercounted** — ST only captures service clock-in/out time, not portal-to-portal. Techs are paid from leaving home to arriving home. Add ~1 hr/day (~5 hrs/week) per tech.
+- **Supplemental pay not in ST** — Danny gets extra $2k/check; others may have similar off-system pay.
+- **Root cause:** Revenue attributed via `technicianId` query param to `/jpm/jobs` — follows job assignment, not actual billing. No reassignment reconciliation logic exists.
+
 ## Learned Behaviors
 - ServiceTitan credentials in .env only
 - Validate all query inputs before API calls

@@ -1,7 +1,7 @@
 # Per-Tech Optimization — Biggest Win for Each
 ## American Leak Detection Jupiter | March 2026
 
-*All numbers from ServiceTitan completed jobs, Jan-Dec 2025.*
+*Job counts and revenue from ServiceTitan completed jobs, Jan-Dec 2025. Per-tech revenue is approximate — ServiceTitan attribution can shift between techs on reassigned jobs; QuickBooks is the source of truth for actual billed amounts.*
 
 ---
 
@@ -259,4 +259,4 @@ Freddy is hourly — different economics entirely. His low avg ticket ($276) sug
 
 ---
 
-*Data source: ServiceTitan completed jobs, Jan-Dec 2025. Per-tech revenue sums (6,344 jobs, $3.32M) exceed deduplicated total ($2.75M) due to multi-tech job counting. Division comparisons use per-tech attribution. Neill injured Q2, Alan injured Q3-Q4, Adam departed, Jesse departing March 2026.*
+*Data source: ServiceTitan completed jobs, Jan-Dec 2025. Per-tech revenue sums (6,344 jobs, $3.32M) exceed deduplicated total ($2.75M) due to multi-tech job counting. Division comparisons use per-tech attribution. Per-tech revenue from ST may differ from QuickBooks actuals due to job reassignment attribution (e.g., Tom: $119K ST vs $98K QB). Neill injured Q2, Alan injured Q3-Q4, Adam departed, Jesse departing March 2026.*

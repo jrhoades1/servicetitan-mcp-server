@@ -2,7 +2,7 @@
 
 Every move here puts more money in the techs' pockets AND grows the business. No one gets pushed. Everyone earns more.
 
-*All numbers from ServiceTitan, Jan-Dec 2025.*
+*Job counts and trends from ServiceTitan, Jan-Dec 2025. Per-tech revenue is approximate — ST attribution can shift on reassigned jobs. QuickBooks is the source of truth for actual billed revenue.*
 
 ---
 
@@ -24,15 +24,16 @@ Tom, Dan, and Kris are performing at a high level. Danny and Kaleb anchor pool. 
 
 With Adam gone and Jesse leaving, there's **26 house jobs/week of proven demand** waiting — calls that were already getting answered. Collin isn't a gamble. He's stepping into a full book.
 
-**What Collin's ramp looks like:**
+**What Collin's ramp looks like (12-month timeline):**
 
 | Timeline | Jobs/Week | Annual Revenue Run Rate | Collin Earns (21%) |
 |----------|----------:|------------------------:|-------------------:|
-| Months 1-3 | 8-10 | $230-290K | $55-70K |
-| Months 4-6 | 12-14 | $345-400K | $83-96K |
-| Full speed | 15+ | $430K+ | $103K+ |
+| Months 1-3 | 4-6 | $115-170K | $28-41K |
+| Months 4-6 | 8-10 | $230-290K | $55-70K |
+| Months 7-9 | 12-14 | $345-400K | $83-96K |
+| Months 10-12 | 15+ | $430K+ | $103K+ |
 
-**The demand is there. Collin just has to show up and learn.**
+**The demand is there. Collin just needs time to learn the trade — equipment, diagnostics, customer confidence. Realistic first-year revenue: ~$250-300K.**
 
 ### Move 2: Robert and Chris expand pool capacity ($300-400K)
 
@@ -87,8 +88,8 @@ Alan when healthy was the **highest-volume house tech** — 17.9 jobs/week, more
 | Kris | Consistent | ~$432K |
 | Alan | Returning from injury | ~$450K |
 | Neill | With coaching | ~$410K |
-| Collin | Training, ramping | ~$350K |
-| **House Total** | | **~$2.62M** |
+| Collin | Training, ramping (12-mo ramp) | ~$250-300K |
+| **House Total** | | **~$2.52-2.57M** |
 
 ### Pool Division (2026 Projected)
 
@@ -104,12 +105,12 @@ Alan when healthy was the **highest-volume house tech** — 17.9 jobs/week, more
 
 ### The Big Picture
 
-| | 2025 Actual | 2026 at Full Capacity |
+| | 2025 Actual | 2026 (Collin ramping, others at capacity) |
 |--|--:|--:|
-| House | $2,435,898 | ~$2,620,000 |
+| House | $2,435,898 | ~$2,520-2,570,000 |
 | Pool | $881,214 | ~$1,365,000 |
-| **Total** | **$3,317,112** | **~$3,985,000** |
-| **Growth** | | **+$668K (+20%)** |
+| **Total** | **$3,317,112** | **~$3,885-3,935,000** |
+| **Growth** | | **+$568-618K (+17-19%)** |
 
 ---
 
@@ -122,7 +123,7 @@ Alan when healthy was the **highest-volume house tech** — 17.9 jobs/week, more
 | Kris | $104K | ~$114K | +$10K |
 | Alan | $73K (injured year) | ~$108K | +$35K (back healthy) |
 | Neill | $95K | ~$135K (with coaching) | +$40K |
-| Collin | New | ~$84K | New hire |
+| Collin | New (12-mo ramp) | ~$60-72K yr 1 | New hire |
 | Danny | $108K | ~$108K | Stable |
 | Kaleb | $73K | ~$73K | Stable |
 | Jason | Ramping | ~$43K | Growing |
@@ -142,4 +143,4 @@ The three things that accelerate it:
 2. **Invest in Neill** — mentoring gets him to $135K and captures $170K for ALD
 3. **Keep Tom and Kris fed** while Alan and Collin ramp up
 
-**$3.3M to $4M. 20% growth. 12 techs instead of 9. Everyone earns more.**
+**$3.3M to ~$3.9M. ~18% growth. 12 techs instead of 9. Everyone earns more.** Collin reaches full capacity in year 2, pushing past $4M.

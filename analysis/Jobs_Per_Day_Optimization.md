@@ -1,7 +1,7 @@
 # Jobs Per Day Optimization — Revenue Impact Analysis
 ## American Leak Detection Jupiter | March 2026
 
-*Based on ServiceTitan completed job data, Jan–Dec 2025*
+*Based on ServiceTitan completed job data, Jan–Dec 2025. Per-tech revenue is approximate — ST attribution can shift on reassigned jobs. QuickBooks is the source of truth for actual billed revenue.*
 
 ---
 
@@ -92,7 +92,9 @@ Currently at **$2.75M**. Adding just **+2 jobs/day across the whole team** reach
 
 ### The Problem
 
-Neill works **19.3 hrs/week** (~2.7 jobs/day) but earns **$94,656/yr** — the highest effective hourly rate on the team at **$94.45/hr**. He's not short on dispatches. He goes home early because the comp structure lets him.
+Neill works **~24 hrs/week** including portal-to-portal drive time (~2.7 jobs/day) and earns **$94,656/yr** — an effective rate of **~$75/hr**. He's not short on dispatches. He goes home early because the comp structure lets him.
+
+> *ServiceTitan only captures on-site clock time (~19 hrs/wk for Neill). Actual paid time includes ~1 hr/day drive time home-to-home.*
 
 ### How the 3% Quarterly Bonus Enables This
 
@@ -195,4 +197,4 @@ Not a pay change — an operational rule:
 
 ---
 
-*Data source: ServiceTitan completed jobs, Jan–Dec 2025 (4,828 jobs, $2.75M revenue). Tech comp from 2025 commission + bonus records.*
+*Data source: ServiceTitan completed jobs, Jan–Dec 2025 (4,828 jobs, $2.75M revenue). Tech comp from 2025 commission + bonus records. Tech hours adjusted +1 hr/day for portal-to-portal drive time. Per-tech revenue from ST may differ from QuickBooks actuals.*

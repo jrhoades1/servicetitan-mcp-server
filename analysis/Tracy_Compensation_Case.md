@@ -1,7 +1,7 @@
-# Compensation Review — Tracy Dietrich
+# Compensation Review — Tracy Rhoades
 ## American Leak Detection Jupiter | February 2026
 
-*All figures from ServiceTitan completed job records — verifiable anytime.*
+*Revenue from ServiceTitan completed job records. Tech hours adjusted to reflect actual paid time (portal-to-portal), not just ServiceTitan on-site clock time. Per-tech revenue is approximate — ServiceTitan attribution can shift between techs on reassigned jobs; QuickBooks is the source of truth for actual billed amounts.*
 
 ---
 
@@ -56,22 +56,22 @@ Over the last 19 months, pricing changes alone gave each commission tech an esti
 
 ## 3. Tracy vs. Technician Compensation (2025)
 
-Compensation includes commission on raw revenue credited + revenue-added bonuses + 3% quarterly bonus. Hours are from ServiceTitan scheduled appointment times (not timesheets).
+Compensation includes commission on raw revenue credited + revenue-added bonuses + 3% quarterly bonus + supplemental pay where applicable. Hours are ServiceTitan on-site time **plus ~1 hr/day** for portal-to-portal drive time (techs are paid from leaving home to arriving home).
 
 | Name      | Annual Comp | Hrs/Wk | Eff. $/Hr |
 |-----------|------------:|-------:|----------:|
-| Dan       |    $134,742 |   30.2 |    $85.81 |
-| Tom       |    $119,977 |   27.3 |    $84.38 |
-| Danny     |    $108,117 |   30.0 |    $69.35 |
-| Kris      |    $103,621 |   25.1 |    $79.39 |
-| Neill     |     $94,656 |   19.3 |    $94.45 |
-| Jesse     |     $94,042 |   26.1 |    $69.41 |
-| Alan      |     $73,207 |   18.1 |    $77.99 |
-| Kaleb     |     $73,141 |   24.2 |    $58.06 |
-| **Avg Tech** | **$100,188** | **25.0** | **$77.36** |
+| Dan       |    $134,742 |   35.2 |    $73.62 |
+| Tom       |    $119,977 |   32.3 |    $71.43 |
+| Danny     |    $108,117 |   35.0 |    $59.43 |
+| Kris      |    $103,621 |   30.1 |    $66.22 |
+| Neill     |     $94,656 |   24.3 |    $74.93 |
+| Jesse     |     $94,042 |   31.1 |    $58.16 |
+| Alan      |     $73,207 |   23.1 |    $60.97 |
+| Kaleb     |     $73,141 |   29.2 |    $48.18 |
+| **Avg Tech** | **$100,188** | **30.0** | **$64.12** |
 | **Tracy** | **$99,000** | **44.0** | **$43.27** |
 
-> *Excludes Freddy and Jason (hourly for most of 2025). Tracy's comp includes her $2,500 quarterly bonus for completeness here.*
+> *Excludes Freddy and Jason (hourly for most of 2025). Tracy's comp includes her $2,500 quarterly bonus. Tech hours include ~5 hrs/wk portal-to-portal adjustment. Danny receives supplemental pay (+$2K/check) not reflected in the commission calc above — his true total comp is higher. Per-tech revenue from ServiceTitan may differ from QuickBooks actuals (e.g., Tom: $119K ST vs $98K QB) due to job reassignment attribution.*
 
 ---
 
@@ -80,16 +80,16 @@ Compensation includes commission on raw revenue credited + revenue-added bonuses
 | Metric                   |      Tracy |   Avg Tech |              Gap |
 |--------------------------|------------|------------|------------------|
 | Annual compensation      |    $99,000 |   $100,188 | About equal      |
-| Hours per week           |       44.0 |       25.0 | Tracy works **76% more** |
-| Effective hourly rate    |     $43.27 |     $77.36 | Techs earn **1.8x more/hr** |
+| Hours per week           |       44.0 |       30.0 | Tracy works **47% more** |
+| Effective hourly rate    |     $43.27 |     $64.12 | Techs earn **48% more/hr** |
 | Automatic raise from pricing | None  | +4.8%/yr   | Gap **grows every year** |
 
 ---
 
 ## 5. Summary
 
-- Tracy earns roughly what the average tech earns — but works **76% more hours per week**.
-- Tracy's effective hourly rate ($43.27) is nearly **half** what techs average ($77.36).
+- Tracy earns roughly what the average tech earns — but works **47% more hours per week**.
+- Tracy's effective hourly rate ($43.27) is **48% less** than what techs average ($64.12).
 - Every price increase automatically raises tech pay. Tracy's salary has not been adjusted in **19+ months**.
 - Pricing alone has given each tech an estimated **$3,400/yr** in additional earnings since early 2024. Tracy: **$0**.
 - This structural gap will continue to widen with every future price increase unless Tracy's compensation is adjusted.
@@ -106,9 +106,9 @@ Prices have risen ~4.8% since early 2024, and Tracy has received no adjustment. 
 
 **Option B — Bring effective hourly closer to parity:**
 
-Tracy's $43.27/hr is 56% of the tech average ($77.36/hr). Even moving to **65-70% of tech effective rate** — recognizing techs carry field risk and licensing — would mean:
-- 65% of $77.36 = $50.28/hr x 2,288 hrs = **$115,041/yr**
-- 70% of $77.36 = $54.15/hr x 2,288 hrs = **$123,929/yr**
+Tracy's $43.27/hr is 67% of the tech average ($64.12/hr). Even moving to **80-85% of tech effective rate** — recognizing techs carry field risk and licensing — would mean:
+- 80% of $64.12 = $51.30/hr x 2,288 hrs = **$117,374/yr**
+- 85% of $64.12 = $54.50/hr x 2,288 hrs = **$124,696/yr**
 
 **Option C — Revenue-based bonus (similar structure to techs):**
 
@@ -118,4 +118,4 @@ Keep the $89,000 base and add a **quarterly bonus tied to team revenue** — for
 
 ---
 
-*Data source: ServiceTitan completed jobs, Jan 2024 - Dec 2025 (9,811 unique jobs, $5.47M total revenue). All figures deduplicated by job ID to match QuickBooks.*
+*Data source: ServiceTitan completed jobs, Jan 2024 - Dec 2025 (9,811 unique jobs, $5.47M total revenue). All figures deduplicated by job ID. Tech hours adjusted +1 hr/day for portal-to-portal paid time not captured in ServiceTitan. Per-tech revenue from ST may differ from QuickBooks actuals due to job reassignment attribution (e.g., Tom: $119K ST vs $98K QB). QuickBooks is the source of truth for actual billed revenue.*
