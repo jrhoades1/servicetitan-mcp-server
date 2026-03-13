@@ -383,6 +383,97 @@ async def compare_technician_job_mix(
 # ---------------------------------------------------------------------------
 
 
+def _format_cancellations_report(
+    enriched: list[dict],
+    total_scheduled: int,
+    start,
+    end,
+    type_names: dict[int, str],
+    tech_names: dict[int, str],
+    late_only: bool,
+) -> str:
+    """Render the cancellations output from enriched cancel records."""
+    date_label = format_date_range(start, end)
+
+    lines = [
+        f"Cancellations  |  {date_label}",
+        f"{'─' * 55}",
+    ]
+
+    if not enriched:
+        qualifier = " late" if late_only else ""
+        lines.append(f"No{qualifier} cancellations found in this date range.")
+        return "\n".join(lines)
+
+    # Sort by completedOn
+    enriched.sort(key=lambda e: e["job"].get("completedOn") or "")
+
+    for e in enriched:
+        job = e["job"]
+        jnum = job.get("jobNumber") or job.get("id")
+        jtype = type_names.get(job.get("jobTypeId"), "—")
+        tid = job.get("technicianId")
+        tname = tech_names.get(tid, "Unassigned") if tid else "Unassigned"
+        canceled_date = (job.get("completedOn") or "")[:10]
+        appt_date = (e["appt_start"] or "")[:10]
+
+        line = f"Job #{jnum}  |  {jtype}  |  Canceled: {canceled_date}"
+        if appt_date:
+            line += f"  |  Scheduled: {appt_date}"
+        lines.append(line)
+        lines.append(f"  Tech: {tname}")
+
+        if e["hours_before"] is not None:
+            h = e["hours_before"]
+            if h < 0:
+                lines.append("  Notice: canceled after scheduled time")
+            elif h < 1:
+                lines.append(f"  Notice: {h * 60:.0f} min before appointment (LATE)")
+            elif h <= 24:
+                lines.append(f"  Notice: {h:.1f} hours before appointment (LATE)")
+            else:
+                days = h / 24
+                lines.append(f"  Notice: {days:.1f} days before appointment")
+
+        if e["tags"]:
+            lines.append(f"  Tags: {', '.join(e['tags'])}")
+
+        lines.append("")
+
+    # Summary block
+    total_cancels = len(enriched)
+    late_count = sum(1 for e in enriched if e["is_late"])
+    cancel_rate = (total_cancels / total_scheduled * 100) if total_scheduled > 0 else 0
+    late_rate = (late_count / total_cancels * 100) if total_cancels > 0 else 0
+
+    hours_list = [e["hours_before"] for e in enriched if e["hours_before"] is not None]
+    avg_hours = sum(hours_list) / len(hours_list) if hours_list else 0
+
+    # Per-tech breakdown
+    tech_cancels: dict[str, dict] = {}
+    for e in enriched:
+        tid = e["job"].get("technicianId")
+        tname = tech_names.get(tid, "Unassigned") if tid else "Unassigned"
+        tc = tech_cancels.setdefault(tname, {"total": 0, "late": 0})
+        tc["total"] += 1
+        if e["is_late"]:
+            tc["late"] += 1
+
+    lines.append("Summary:")
+    lines.append(f"  Total cancellations: {total_cancels} of {total_scheduled} jobs ({cancel_rate:.1f}%)")
+    lines.append(f"  Late cancels (<24h): {late_count} ({late_rate:.1f}% of cancels)")
+    if hours_list:
+        lines.append(f"  Avg notice: {avg_hours:.1f} hours")
+
+    if tech_cancels:
+        lines.append("")
+        lines.append("  By technician:")
+        for tname, tc in sorted(tech_cancels.items(), key=lambda x: x[1]["total"], reverse=True):
+            lines.append(f"    {tname}: {tc['total']} cancels ({tc['late']} late)")
+
+    return "\n".join(lines)
+
+
 @mcp.tool()
 async def get_cancellations(
     start_date: str = "",
@@ -519,85 +610,10 @@ async def get_cancellations(
                 "appt_start": appt_start,
             })
 
-        date_label = format_date_range(start, end)
-
-        lines = [
-            f"Cancellations  |  {date_label}",
-            f"{'─' * 55}",
-        ]
-
-        if not enriched:
-            qualifier = " late" if query.late_only else ""
-            lines.append(f"No{qualifier} cancellations found in this date range.")
-            return "\n".join(lines)
-
-        # Sort by completedOn
-        enriched.sort(key=lambda e: e["job"].get("completedOn") or "")
-
-        for e in enriched:
-            job = e["job"]
-            jnum = job.get("jobNumber") or job.get("id")
-            jtype = type_names.get(job.get("jobTypeId"), "—")
-            tid = job.get("technicianId")
-            tname = tech_names.get(tid, "Unassigned") if tid else "Unassigned"
-            canceled_date = (job.get("completedOn") or "")[:10]
-            appt_date = (e["appt_start"] or "")[:10]
-
-            line = f"Job #{jnum}  |  {jtype}  |  Canceled: {canceled_date}"
-            if appt_date:
-                line += f"  |  Scheduled: {appt_date}"
-            lines.append(line)
-            lines.append(f"  Tech: {tname}")
-
-            if e["hours_before"] is not None:
-                h = e["hours_before"]
-                if h < 0:
-                    lines.append("  Notice: canceled after scheduled time")
-                elif h < 1:
-                    lines.append(f"  Notice: {h * 60:.0f} min before appointment (LATE)")
-                elif h <= 24:
-                    lines.append(f"  Notice: {h:.1f} hours before appointment (LATE)")
-                else:
-                    days = h / 24
-                    lines.append(f"  Notice: {days:.1f} days before appointment")
-
-            if e["tags"]:
-                lines.append(f"  Tags: {', '.join(e['tags'])}")
-
-            lines.append("")
-
-        # Summary block
-        total_cancels = len(enriched)
-        late_count = sum(1 for e in enriched if e["is_late"])
-        cancel_rate = (total_cancels / total_scheduled * 100) if total_scheduled > 0 else 0
-        late_rate = (late_count / total_cancels * 100) if total_cancels > 0 else 0
-
-        hours_list = [e["hours_before"] for e in enriched if e["hours_before"] is not None]
-        avg_hours = sum(hours_list) / len(hours_list) if hours_list else 0
-
-        # Per-tech breakdown
-        tech_cancels: dict[str, dict] = {}
-        for e in enriched:
-            tid = e["job"].get("technicianId")
-            tname = tech_names.get(tid, "Unassigned") if tid else "Unassigned"
-            tc = tech_cancels.setdefault(tname, {"total": 0, "late": 0})
-            tc["total"] += 1
-            if e["is_late"]:
-                tc["late"] += 1
-
-        lines.append("Summary:")
-        lines.append(f"  Total cancellations: {total_cancels} of {total_scheduled} jobs ({cancel_rate:.1f}%)")
-        lines.append(f"  Late cancels (<24h): {late_count} ({late_rate:.1f}% of cancels)")
-        if hours_list:
-            lines.append(f"  Avg notice: {avg_hours:.1f} hours")
-
-        if tech_cancels:
-            lines.append("")
-            lines.append("  By technician:")
-            for tname, tc in sorted(tech_cancels.items(), key=lambda x: x[1]["total"], reverse=True):
-                lines.append(f"    {tname}: {tc['total']} cancels ({tc['late']} late)")
-
-        return "\n".join(lines)
+        return _format_cancellations_report(
+            enriched, total_scheduled, start, end,
+            type_names, tech_names, query.late_only,
+        )
 
     except Exception as exc:
         log.error("tool.get_cancellations.error", error_type=type(exc).__name__)
@@ -607,6 +623,145 @@ async def get_cancellations(
 # ---------------------------------------------------------------------------
 # Tool 15: get_technician_discounts
 # ---------------------------------------------------------------------------
+
+
+def _format_discounts_report(
+    discounted_jobs: list[dict],
+    total_invoices: int,
+    start,
+    end,
+    tech_names: dict[int, str],
+) -> str:
+    """Render the discount report output from processed discount records."""
+    date_label = format_date_range(start, end)
+
+    lines = [
+        f"Discount Report  |  {date_label}",
+        f"{'─' * 55}",
+    ]
+
+    if not discounted_jobs:
+        lines.append("No discounted invoices found in this date range.")
+        return "\n".join(lines)
+
+    # Sort by date
+    discounted_jobs.sort(key=lambda d: d["date"])
+
+    for d in discounted_jobs:
+        tname = tech_names.get(d["tech_id"], "Unassigned") if d["tech_id"] else "Unassigned"
+        lines.append(f"Job #{d['job_num']}  |  {d['date']}  |  {d['job_type']}  |  {d['bu']}")
+        lines.append(
+            f"  Gross: {fmt_currency(d['gross'])}  |  "
+            f"Discount: {fmt_currency(d['discount'])} ({d['disc_pct']:.1f}%)  |  "
+            f"Net: {fmt_currency(d['net'])}"
+        )
+        lines.append(f"  Tech: {tname}")
+        if d["reasons"]:
+            reasons = ", ".join(set(d["reasons"]))
+            lines.append(f"  Reason: {reasons}")
+        lines.append("")
+
+    # Summary
+    total_disc_count = len(discounted_jobs)
+    total_discount_dollars = sum(d["discount"] for d in discounted_jobs)
+    total_gross = sum(d["gross"] for d in discounted_jobs)
+    total_net = sum(d["net"] for d in discounted_jobs)
+    disc_rate = (total_disc_count / total_invoices * 100) if total_invoices > 0 else 0
+    rev_impact = (total_discount_dollars / total_gross * 100) if total_gross > 0 else 0
+    avg_disc = total_discount_dollars / total_disc_count if total_disc_count > 0 else 0
+
+    # Per-tech breakdown
+    tech_disc: dict[str, dict] = {}
+    for d in discounted_jobs:
+        tname = tech_names.get(d["tech_id"], "Unassigned") if d["tech_id"] else "Unassigned"
+        td = tech_disc.setdefault(tname, {"count": 0, "total_disc": 0.0})
+        td["count"] += 1
+        td["total_disc"] += d["discount"]
+
+    lines.append("Summary:")
+    lines.append(f"  {total_disc_count} of {total_invoices} invoices discounted ({disc_rate:.1f}%)")
+    lines.append(f"  Total discounted: {fmt_currency(total_discount_dollars)}")
+    lines.append(f"  Gross revenue: {fmt_currency(total_gross)}  |  Net revenue: {fmt_currency(total_net)}")
+    lines.append(f"  Revenue impact: {rev_impact:.1f}%")
+    lines.append(f"  Avg discount: {fmt_currency(avg_disc)} per discounted job")
+
+    if tech_disc:
+        lines.append("")
+        lines.append("  By technician:")
+        for tname, td in sorted(tech_disc.items(), key=lambda x: x[1]["total_disc"], reverse=True):
+            lines.append(f"    {tname}: {td['count']} discounts, {fmt_currency(td['total_disc'])} total")
+
+    return "\n".join(lines)
+
+
+def _process_invoices_for_discounts(
+    invoices: list[dict],
+    job_info: dict[int, dict],
+    type_names: dict[int, str],
+    tech_filter_id: int | None,
+    min_discount_amount: float,
+) -> tuple[list[dict], int]:
+    """Process invoices and return (discounted_jobs, total_invoices)."""
+    discounted_jobs: list[dict] = []
+    total_invoices = 0
+
+    for inv in invoices:
+        # Extract safe fields only — NO customer/location/summary data
+        job_data = inv.get("job") or {}
+        job_id = job_data.get("id")
+        job_num = job_data.get("number", "—")
+        job_type_name = job_data.get("type", "—")
+
+        # Look up tech from our jobs data
+        ji = job_info.get(job_id, {})
+        tid = ji.get("technicianId")
+        jtid = ji.get("jobTypeId")
+
+        # Apply tech filter
+        if tech_filter_id is not None and tid != tech_filter_id:
+            continue
+
+        total_invoices += 1
+
+        # Check for discount line items
+        disc_items = _extract_discounts(inv)
+        if not disc_items:
+            continue
+
+        total_discount = sum(d["amount"] for d in disc_items)
+
+        # Apply min_discount_amount filter
+        if total_discount < min_discount_amount:
+            continue
+
+        gross = inv.get("subTotal") or 0.0
+        net = inv.get("total") or 0.0
+
+        # Get business unit (only id and name — no PII)
+        bu_data = inv.get("businessUnit") or {}
+        bu_name = bu_data.get("name", "—")
+
+        # Invoice date
+        inv_date = (inv.get("invoiceDate") or "")[:10]
+
+        # Use job type from our lookup if available
+        if jtid and jtid in type_names:
+            job_type_name = type_names[jtid]
+
+        discounted_jobs.append({
+            "job_num": job_num,
+            "job_type": job_type_name,
+            "date": inv_date,
+            "tech_id": tid,
+            "gross": gross,
+            "discount": total_discount,
+            "net": net,
+            "disc_pct": (total_discount / gross * 100) if gross > 0 else 0,
+            "reasons": [d["reason"] for d in disc_items],
+            "bu": bu_name,
+        })
+
+    return discounted_jobs, total_invoices
 
 
 def _extract_discounts(invoice: dict) -> list[dict]:
@@ -735,125 +890,14 @@ async def get_technician_discounts(
                 return f'"{query.technician_name}" matches multiple technicians: {names}.\nPlease be more specific.'
             tech_filter_id = matches[0]["id"]
 
-        # Process invoices for discounts
-        discounted_jobs: list[dict] = []
-        total_invoices = 0
+        discounted_jobs, total_invoices = _process_invoices_for_discounts(
+            invoices, job_info, type_names,
+            tech_filter_id, query.min_discount_amount,
+        )
 
-        for inv in invoices:
-            # Extract safe fields only — NO customer/location/summary data
-            job_data = inv.get("job") or {}
-            job_id = job_data.get("id")
-            job_num = job_data.get("number", "—")
-            job_type_name = job_data.get("type", "—")
-
-            # Look up tech from our jobs data
-            ji = job_info.get(job_id, {})
-            tid = ji.get("technicianId")
-            jtid = ji.get("jobTypeId")
-
-            # Apply tech filter
-            if tech_filter_id is not None and tid != tech_filter_id:
-                continue
-
-            total_invoices += 1
-
-            # Check for discount line items
-            disc_items = _extract_discounts(inv)
-            if not disc_items:
-                continue
-
-            total_discount = sum(d["amount"] for d in disc_items)
-
-            # Apply min_discount_amount filter
-            if total_discount < query.min_discount_amount:
-                continue
-
-            gross = inv.get("subTotal") or 0.0
-            net = inv.get("total") or 0.0
-
-            # Get business unit (only id and name — no PII)
-            bu_data = inv.get("businessUnit") or {}
-            bu_name = bu_data.get("name", "—")
-
-            # Invoice date
-            inv_date = (inv.get("invoiceDate") or "")[:10]
-
-            # Use job type from our lookup if available
-            if jtid and jtid in type_names:
-                job_type_name = type_names[jtid]
-
-            discounted_jobs.append({
-                "job_num": job_num,
-                "job_type": job_type_name,
-                "date": inv_date,
-                "tech_id": tid,
-                "gross": gross,
-                "discount": total_discount,
-                "net": net,
-                "disc_pct": (total_discount / gross * 100) if gross > 0 else 0,
-                "reasons": [d["reason"] for d in disc_items],
-                "bu": bu_name,
-            })
-
-        date_label = format_date_range(start, end)
-
-        lines = [
-            f"Discount Report  |  {date_label}",
-            f"{'─' * 55}",
-        ]
-
-        if not discounted_jobs:
-            lines.append("No discounted invoices found in this date range.")
-            return "\n".join(lines)
-
-        # Sort by date
-        discounted_jobs.sort(key=lambda d: d["date"])
-
-        for d in discounted_jobs:
-            tname = tech_names.get(d["tech_id"], "Unassigned") if d["tech_id"] else "Unassigned"
-            lines.append(f"Job #{d['job_num']}  |  {d['date']}  |  {d['job_type']}  |  {d['bu']}")
-            lines.append(
-                f"  Gross: {fmt_currency(d['gross'])}  |  "
-                f"Discount: {fmt_currency(d['discount'])} ({d['disc_pct']:.1f}%)  |  "
-                f"Net: {fmt_currency(d['net'])}"
-            )
-            lines.append(f"  Tech: {tname}")
-            if d["reasons"]:
-                reasons = ", ".join(set(d["reasons"]))
-                lines.append(f"  Reason: {reasons}")
-            lines.append("")
-
-        # Summary
-        total_disc_count = len(discounted_jobs)
-        total_discount_dollars = sum(d["discount"] for d in discounted_jobs)
-        total_gross = sum(d["gross"] for d in discounted_jobs)
-        total_net = sum(d["net"] for d in discounted_jobs)
-        disc_rate = (total_disc_count / total_invoices * 100) if total_invoices > 0 else 0
-        rev_impact = (total_discount_dollars / total_gross * 100) if total_gross > 0 else 0
-        avg_disc = total_discount_dollars / total_disc_count if total_disc_count > 0 else 0
-
-        # Per-tech breakdown
-        tech_disc: dict[str, dict] = {}
-        for d in discounted_jobs:
-            tname = tech_names.get(d["tech_id"], "Unassigned") if d["tech_id"] else "Unassigned"
-            td = tech_disc.setdefault(tname, {"count": 0, "total_disc": 0.0})
-            td["count"] += 1
-            td["total_disc"] += d["discount"]
-
-        lines.append("Summary:")
-        lines.append(f"  {total_disc_count} of {total_invoices} invoices discounted ({disc_rate:.1f}%)")
-        lines.append(f"  Total discounted: {fmt_currency(total_discount_dollars)}")
-        lines.append(f"  Gross revenue: {fmt_currency(total_gross)}  |  Net revenue: {fmt_currency(total_net)}")
-        lines.append(f"  Revenue impact: {rev_impact:.1f}%")
-        lines.append(f"  Avg discount: {fmt_currency(avg_disc)} per discounted job")
-
-        if tech_disc:
-            lines.append("")
-            lines.append("  By technician:")
-            for tname, td in sorted(tech_disc.items(), key=lambda x: x[1]["total_disc"], reverse=True):
-                lines.append(f"    {tname}: {td['count']} discounts, {fmt_currency(td['total_disc'])} total")
-
-        return "\n".join(lines)
+        return _format_discounts_report(
+            discounted_jobs, total_invoices, start, end, tech_names,
+        )
 
     except Exception as exc:
         log.error("tool.get_technician_discounts.error", error_type=type(exc).__name__)

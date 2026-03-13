@@ -214,6 +214,90 @@ async def get_jobs_summary(
         return f"Error: {user_friendly_error(exc)}"
 
 
+def _format_jobs_output(
+    filtered: list[dict],
+    start,
+    end,
+    wanted_ids: set[int],
+    type_names: dict[int, str],
+    tech_names: dict[int, str],
+    bus_names: dict[int, str],
+    job_techs: dict[int, list[dict]],
+    job_type_list: list[str],
+) -> str:
+    """Format the output text for get_jobs_by_type from the filtered jobs list."""
+    date_label = format_date_range(start, end)
+    header_type_name = None
+    for tid in wanted_ids:
+        header_type_name = type_names.get(tid)
+        if header_type_name:
+            break
+    header_type_name = header_type_name or ", ".join(job_type_list)
+
+    lines: list[str] = [f"{header_type_name} Jobs  |  {date_label}", f"{'─' * 50}"]
+
+    tech_counter: dict[str, int] = {}
+    total_revenue = 0.0
+
+    if not filtered:
+        lines.append("No matching jobs found in this date range.")
+        return "\n".join(lines)
+
+    filtered.sort(key=lambda j: j.get("completedOn") or "")
+
+    for job in filtered:
+        jid = job.get("id")
+        jobnum = job.get("jobNumber") or jid
+        completed = (job.get("completedOn") or "")[:10] if job.get("completedOn") else "—"
+        total = job.get("total") or 0.0
+        total_revenue += total
+        bu = bus_names.get(job.get("businessUnitId"), "—")
+
+        lines.append(f"Job #{jobnum}  |  {completed}  |  {fmt_currency(total)}  |  {bu}")
+        techs = []
+        assigned = job_techs.get(jid, [])
+        primary_id = job.get("technicianId")
+        if primary_id is not None and not any(a["id"] == primary_id for a in assigned):
+            assigned.insert(0, {"id": primary_id, "role": "Primary", "is_original": False})
+
+        for a in assigned:
+            tid = a.get("id")
+            name = tech_names.get(tid, f"Tech {tid}")
+            role = a.get("role") or ("Primary" if tid == primary_id else "Added")
+            is_orig = a.get("is_original", False)
+            label = f"{name} ({role})"
+            if is_orig:
+                label += " (Original)"
+            techs.append(label)
+            tech_counter[name] = tech_counter.get(name, 0) + 1
+
+        if techs:
+            lines.append(f"  Technicians: {', '.join(techs)}")
+        else:
+            lines.append("  Technicians: —")
+
+        rid = job.get("recallForId") or (job.get("relatedJob") or {}).get("id")
+        if rid:
+            lines.append(f"  Related job: {rid}")
+
+        lines.append("")
+
+    # Summary block
+    total_jobs = len(filtered)
+    no_charge = count_no_charge(filtered)
+    lines.append("Summary:")
+    lines.append(f"  total_jobs: {total_jobs}")
+    lines.append(f"  total_revenue: {fmt_currency(total_revenue)}")
+    lines.append(f"  no_charge_count: {no_charge}")
+    if tech_counter:
+        summary = "  technician_summary: " + "  |  ".join(
+            f"{name}: {count}" for name, count in sorted(tech_counter.items(), key=lambda x: x[1], reverse=True)
+        )
+        lines.append(summary)
+
+    return "\n".join(lines)
+
+
 @mcp.tool()
 async def get_jobs_by_type(
     job_types: str,
@@ -345,77 +429,10 @@ async def get_jobs_by_type(
 
             filtered.append(job)
 
-        # Build output lines
-        date_label = format_date_range(start, end)
-        header_type_name = None
-        for tid in wanted_ids:
-            header_type_name = type_names.get(tid)
-            if header_type_name:
-                break
-        header_type_name = header_type_name or ", ".join(query.job_type_list())
-
-        lines: list[str] = [f"{header_type_name} Jobs  |  {date_label}", f"{'─' * 50}"]
-
-        tech_counter: dict[str, int] = {}
-        total_revenue = 0.0
-
-        if not filtered:
-            lines.append("No matching jobs found in this date range.")
-            return "\n".join(lines)
-
-        filtered.sort(key=lambda j: j.get("completedOn") or "")
-
-        for job in filtered:
-            jid = job.get("id")
-            jobnum = job.get("jobNumber") or jid
-            completed = (job.get("completedOn") or "")[:10] if job.get("completedOn") else "—"
-            total = job.get("total") or 0.0
-            total_revenue += total
-            bu = bus_names.get(job.get("businessUnitId"), "—")
-
-            lines.append(f"Job #{jobnum}  |  {completed}  |  {fmt_currency(total)}  |  {bu}")
-            techs = []
-            assigned = job_techs.get(jid, [])
-            primary_id = job.get("technicianId")
-            if primary_id is not None and not any(a["id"] == primary_id for a in assigned):
-                assigned.insert(0, {"id": primary_id, "role": "Primary", "is_original": False})
-
-            for a in assigned:
-                tid = a.get("id")
-                name = tech_names.get(tid, f"Tech {tid}")
-                role = a.get("role") or ("Primary" if tid == primary_id else "Added")
-                is_orig = a.get("is_original", False)
-                label = f"{name} ({role})"
-                if is_orig:
-                    label += " (Original)"
-                techs.append(label)
-                tech_counter[name] = tech_counter.get(name, 0) + 1
-
-            if techs:
-                lines.append(f"  Technicians: {', '.join(techs)}")
-            else:
-                lines.append("  Technicians: —")
-
-            rid = job.get("recallForId") or (job.get("relatedJob") or {}).get("id")
-            if rid:
-                lines.append(f"  Related job: {rid}")
-
-            lines.append("")
-
-        # Summary block
-        total_jobs = len(filtered)
-        no_charge = count_no_charge(filtered)
-        lines.append("Summary:")
-        lines.append(f"  total_jobs: {total_jobs}")
-        lines.append(f"  total_revenue: {fmt_currency(total_revenue)}")
-        lines.append(f"  no_charge_count: {no_charge}")
-        if tech_counter:
-            summary = "  technician_summary: " + "  |  ".join(
-                f"{name}: {count}" for name, count in sorted(tech_counter.items(), key=lambda x: x[1], reverse=True)
-            )
-            lines.append(summary)
-
-        return "\n".join(lines)
+        return _format_jobs_output(
+            filtered, start, end, wanted_ids, type_names,
+            tech_names, bus_names, job_techs, query.job_type_list(),
+        )
 
     except Exception as exc:
         log.error("tool.get_jobs_by_type.error", error_type=type(exc).__name__)

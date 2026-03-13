@@ -379,6 +379,123 @@ async def compare_technicians(
         return f"Error: {user_friendly_error(exc)}"
 
 
+def _build_grand_total_row(
+    cat_months: dict[int, dict[tuple[int, int], dict]],
+    months: list[tuple[int, int]],
+    rows: list[tuple],
+) -> tuple[int, float, float, list[float | None], float | None]:
+    """Compute grand-total aggregates across all categories for the trend table."""
+    grand_mavgs: list[float | None] = []
+    for mo in months:
+        rev = sum(
+            cat_months[cid].get(mo, {}).get("revenue", 0)
+            for cid in cat_months
+        )
+        billed = sum(
+            cat_months[cid].get(mo, {}).get("billed", 0)
+            for cid in cat_months
+        )
+        grand_mavgs.append(rev / billed if billed > 0 else None)
+
+    grand_jobs = sum(r[1] for r in rows)
+    grand_rev = sum(r[2] for r in rows)
+    grand_billed = sum(
+        sum(md["billed"] for md in mdata.values())
+        for mdata in cat_months.values()
+    )
+    grand_avg = grand_rev / grand_billed if grand_billed > 0 else 0.0
+    g_first = next((v for v in grand_mavgs if v is not None), None)
+    g_last = next((v for v in reversed(grand_mavgs) if v is not None), None)
+    grand_change = (
+        (g_last - g_first) / g_first * 100
+        if g_first and g_last and g_first > 0
+        else None
+    )
+
+    return grand_jobs, grand_rev, grand_avg, grand_mavgs, grand_change
+
+
+def _format_revenue_table(
+    rows: list[tuple],
+    months: list[tuple[int, int]],
+    cat_label: str,
+    date_label: str,
+    grand_jobs: int,
+    grand_avg: float,
+    grand_mavgs: list[float | None],
+    grand_change: float | None,
+    cross_year: bool,
+) -> str:
+    """Render the revenue trend table from pre-computed rows and grand totals."""
+    month_labels = [month_label(y, m, cross_year) for y, m in months]
+    name_w = max(len(r[0]) for r in rows)
+    name_w = max(name_w, len(cat_label), 10)
+
+    mcol_w = 8
+    month_header = "  ".join(f"{ml:>{mcol_w}}" for ml in month_labels)
+    header = (
+        f"{cat_label:<{name_w}}  {'Jobs':>5}  {'Avg $/Job':>10}"
+        f"  {month_header}  {'Change':>8}"
+    )
+    sep = "─" * len(header)
+
+    lines = [
+        f"Revenue per Job Trend by {cat_label}  |  {date_label}",
+        sep,
+        header,
+        sep,
+    ]
+
+    for name, t_jobs, t_rev, avg, mavgs, change in rows:
+        mcells = []
+        for v in mavgs:
+            mcells.append(
+                f"{fmt_dollar_short(v):>{mcol_w}}" if v is not None
+                else f"{'—':>{mcol_w}}"
+            )
+        mstr = "  ".join(mcells)
+
+        if change is not None:
+            arrow = "↑" if change >= 0 else "↓"
+            sign = "+" if change >= 0 else ""
+            cstr = f"{arrow} {sign}{change:.0f}%"
+        else:
+            cstr = "—"
+
+        lines.append(
+            f"{name:<{name_w}}  {t_jobs:>5}  {fmt_currency(avg):>10}"
+            f"  {mstr}  {cstr:>8}"
+        )
+
+    mcells = []
+    for v in grand_mavgs:
+        mcells.append(
+            f"{fmt_dollar_short(v):>{mcol_w}}" if v is not None
+            else f"{'—':>{mcol_w}}"
+        )
+    mstr = "  ".join(mcells)
+
+    if grand_change is not None:
+        arrow = "↑" if grand_change >= 0 else "↓"
+        sign = "+" if grand_change >= 0 else ""
+        gcstr = f"{arrow} {sign}{grand_change:.0f}%"
+    else:
+        gcstr = "—"
+
+    lines.append(sep)
+    lines.append(
+        f"{'TOTAL':<{name_w}}  {grand_jobs:>5}  {fmt_currency(grand_avg):>10}"
+        f"  {mstr}  {gcstr:>8}"
+    )
+
+    if len(months) < 2:
+        lines.append(
+            "\n(Only 1 month in range — use 60-90 days for meaningful trends)"
+        )
+
+    return "\n".join(lines)
+
+
 @mcp.tool()
 async def get_revenue_trend(
     group_by: str = "job_type",
@@ -499,100 +616,14 @@ async def get_revenue_trend(
 
         rows.sort(key=lambda r: r[2], reverse=True)
 
-        grand_mavgs: list[float | None] = []
-        for mo in months:
-            rev = sum(
-                cat_months[cid].get(mo, {}).get("revenue", 0)
-                for cid in cat_months
-            )
-            billed = sum(
-                cat_months[cid].get(mo, {}).get("billed", 0)
-                for cid in cat_months
-            )
-            grand_mavgs.append(rev / billed if billed > 0 else None)
-
-        grand_jobs = sum(r[1] for r in rows)
-        grand_rev = sum(r[2] for r in rows)
-        grand_billed = sum(
-            sum(md["billed"] for md in mdata.values())
-            for mdata in cat_months.values()
-        )
-        grand_avg = grand_rev / grand_billed if grand_billed > 0 else 0.0
-        g_first = next((v for v in grand_mavgs if v is not None), None)
-        g_last = next((v for v in reversed(grand_mavgs) if v is not None), None)
-        grand_change = (
-            (g_last - g_first) / g_first * 100
-            if g_first and g_last and g_first > 0
-            else None
+        grand_jobs, grand_rev, grand_avg, grand_mavgs, grand_change = (
+            _build_grand_total_row(cat_months, months, rows)
         )
 
-        month_labels = [month_label(y, m, cross_year) for y, m in months]
-        name_w = max(len(r[0]) for r in rows)
-        name_w = max(name_w, len(cat_label), 10)
-
-        mcol_w = 8
-        month_header = "  ".join(f"{ml:>{mcol_w}}" for ml in month_labels)
-        header = (
-            f"{cat_label:<{name_w}}  {'Jobs':>5}  {'Avg $/Job':>10}"
-            f"  {month_header}  {'Change':>8}"
+        return _format_revenue_table(
+            rows, months, cat_label, date_label,
+            grand_jobs, grand_avg, grand_mavgs, grand_change, cross_year,
         )
-        sep = "─" * len(header)
-
-        lines = [
-            f"Revenue per Job Trend by {cat_label}  |  {date_label}",
-            sep,
-            header,
-            sep,
-        ]
-
-        for name, t_jobs, t_rev, avg, mavgs, change in rows:
-            mcells = []
-            for v in mavgs:
-                mcells.append(
-                    f"{fmt_dollar_short(v):>{mcol_w}}" if v is not None
-                    else f"{'—':>{mcol_w}}"
-                )
-            mstr = "  ".join(mcells)
-
-            if change is not None:
-                arrow = "↑" if change >= 0 else "↓"
-                sign = "+" if change >= 0 else ""
-                cstr = f"{arrow} {sign}{change:.0f}%"
-            else:
-                cstr = "—"
-
-            lines.append(
-                f"{name:<{name_w}}  {t_jobs:>5}  {fmt_currency(avg):>10}"
-                f"  {mstr}  {cstr:>8}"
-            )
-
-        mcells = []
-        for v in grand_mavgs:
-            mcells.append(
-                f"{fmt_dollar_short(v):>{mcol_w}}" if v is not None
-                else f"{'—':>{mcol_w}}"
-            )
-        mstr = "  ".join(mcells)
-
-        if grand_change is not None:
-            arrow = "↑" if grand_change >= 0 else "↓"
-            sign = "+" if grand_change >= 0 else ""
-            gcstr = f"{arrow} {sign}{grand_change:.0f}%"
-        else:
-            gcstr = "—"
-
-        lines.append(sep)
-        lines.append(
-            f"{'TOTAL':<{name_w}}  {grand_jobs:>5}  {fmt_currency(grand_avg):>10}"
-            f"  {mstr}  {gcstr:>8}"
-        )
-
-        if len(months) < 2:
-            lines.append(
-                "\n(Only 1 month in range — use 60-90 days for meaningful trends)"
-            )
-
-        return "\n".join(lines)
 
     except Exception as exc:
         log.error("tool.get_revenue_trend.error", error_type=type(exc).__name__)
