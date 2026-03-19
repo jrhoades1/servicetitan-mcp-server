@@ -7,15 +7,15 @@
 
 ## 1. Price Increases Automatically Raise Tech Pay
 
-Technicians earn **24% of every dollar** (21% commission + 3% quarterly bonus). When ALD raises prices, their pay rises automatically. Tracy's salary does not.
+Technicians earn **24% of every dollar** (21% commission + 3% quarterly bonus). When ALD raises prices, their pay rises automatically. Tracy's rate does not.
 
 |                        | Q1 2024 (Baseline) | Late 2025 (Current) | Change   |
 |------------------------|-------------------:|-------------------:|---------:|
 | **Avg job ticket**     |              $536  |              $562  | **+4.8%** |
 | **Tech earnings/job**  |              $129  |              $135  | **+4.8%** |
-| **Tracy base salary**  |           $89,000  |           $89,000  | **0.0%** |
+| **Tracy's hourly rate**|           $43.27   |           $43.27   | **0.0%** |
 
-Over the last 21 months, pricing changes alone gave each commission tech an estimated **$3,400/yr raise** — same workload, just higher prices. Tracy received $0.
+Over the last 21 months, pricing changes alone gave each commission tech an estimated **+$1.96/hr raise** — same workload, just higher prices. Tracy received $0.00/hr.
 
 > *Note: 21% is the lowest commission rate. Dan earns 25% and Danny earns 23%, making their automatic increases even larger.*
 
@@ -58,16 +58,16 @@ Over the last 21 months, pricing changes alone gave each commission tech an esti
 
 Compensation from QuickBooks payroll. Hours from Jill Dare / payroll (65 hrs per pay period = 32.5 hrs/week for techs). Tracy works 44 hrs/week.
 
-| Name      | Annual Comp (QB) | Hrs/Wk | Eff. $/Hr |
-|-----------|-----------------:|-------:|----------:|
-| Dan       |        $126,942  |   32.5 |    $76.92 |
-| Tom       |         $98,000  |   32.5 |    $59.36 |
-| Kris      |         $84,500  |   32.5 |    $51.18 |
-| Neill     |         $83,000  |   32.5 |    $50.27 |
-| Alan      |         $72,000  |   32.5 |    $43.61 |
-| Kaleb     |         $63,000  |   32.5 |    $38.16 |
-| **Avg Tech** | **$87,907** | **32.5** | **$52.02** |
-| **Tracy** | **$99,000** | **44.0** | **$43.27** |
+| Name      | Hrs/Wk | Eff. $/Hr |
+|-----------|-------:|----------:|
+| Dan       |   32.5 |    $76.92 |
+| Tom       |   32.5 |    $59.36 |
+| Kris      |   32.5 |    $51.18 |
+| Neill     |   32.5 |    $50.27 |
+| Alan      |   32.5 |    $43.61 |
+| Kaleb     |   32.5 |    $38.16 |
+| **Avg Tech** | **32.5** | **$52.02** |
+| **Tracy** | **44.0** | **$43.27** |
 
 > *Full-year techs only (excludes Freddy and Jason — hourly/partial year). Tracy's comp includes $2,500 quarterly bonus. Alan's comp reflects injury in Q3-Q4.*
 
@@ -77,36 +77,34 @@ Compensation from QuickBooks payroll. Hours from Jill Dare / payroll (65 hrs per
 
 | Metric                   |      Tracy |   Avg Tech |              Gap |
 |--------------------------|------------|------------|------------------|
-| Annual compensation      |    $99,000 |    $87,907 | Tracy earns **$11K more** |
+| Effective hourly rate    |   $43.27/hr |  $52.02/hr | Techs earn **20% more/hr** |
 | Hours per week           |       44.0 |       32.5 | Tracy works **35% more** |
-| Effective hourly rate    |     $43.27 |     $52.02 | Techs earn **20% more/hr** |
-| Automatic raise from pricing | None  | +4.8%/yr   | Gap **grows every year** |
+| Automatic raise from pricing | $0.00/hr  | +$1.96/hr   | Gap **grows every year** |
 
-Tracy earns more annually — but only because she works 598 more hours per year. Per hour, techs earn 20% more.
+Tracy works 35% more hours per week and earns 20% less per hour. The gap widens with every price increase.
 
 ---
 
 ## 5. Summary
 
-- Tracy earns $11K more annually than the average tech — but works **35% more hours per week** to get there.
-- Tracy's effective hourly rate ($43.27) is **20% less** than what techs average ($52.02).
-- Every price increase automatically raises tech pay. Tracy's salary has not been adjusted in **21 months**.
-- Pricing alone has given each tech an estimated **$3,400/yr** in additional earnings since early 2024. Tracy: **$0**.
-- This structural gap will continue to widen with every future price increase unless Tracy's compensation is adjusted.
+- Tracy's hourly rate ($43.27/hr) is **20% less** than what techs average ($52.02/hr).
+- Tracy works **35% more hours per week** (44 vs 32.5).
+- Every price increase automatically raises tech pay. Tracy's rate has not been adjusted in **21 months**.
+- Pricing alone has given each tech an estimated **+$1.96/hr**. Tracy: **$0.00/hr**.
+- This gap widens with every future price increase unless Tracy's rate is adjusted.
 
 ---
 
 ## 6. Proposed Adjustment
 
-| Component | Current | Proposed |
-|-----------|--------:|--------:|
-| Base salary | $89,000 | **$95,000** |
-| Quarterly bonus | $2,500/qtr flat | **0.35% of quarterly revenue** (~$2,400/qtr — *less than current*) |
-| **Total estimated comp** | **$99,000** | **~$104,600** |
+| | Current | Proposed | Difference |
+|--|--------:|--------:|-----------:|
+| **Hourly rate** | **$43.27/hr** | **$45.87/hr** | **+$2.60/hr** |
+| Quarterly bonus | $2,500/qtr flat | 0.36% of revenue (~$2,466/qtr) | *less than current* |
 
-- The $6,000 base increase covers the 4.8% pricing catch-up ($4,272) plus partial cost-of-living for two years
-- The revenue-tied bonus replaces the current flat $2,500 at roughly the same dollar amount — just tied to business performance so it keeps pace with future pricing
-- Total comp of ~$105K is below Florida market for Service Operations Manager ($100–115K base per Glassdoor, Salary.com)
+- The ask is **$2.60 more per hour** — still below every tech on the team
+- The quarterly bonus goes down slightly (~$2,400 vs $2,500), just tied to revenue instead of flat
+- At $45.87/hr, Tracy would still be the lowest hourly rate in the building
 
 > *The key principle: when the business raises prices, everyone who contributes to that revenue should benefit — not just the field team.*
 

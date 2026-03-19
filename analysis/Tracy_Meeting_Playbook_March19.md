@@ -5,7 +5,7 @@
 
 ## Summary
 
-My base salary has been $89,000 for **21 months** with no adjustment. During that time, pricing increases have automatically raised technician compensation through their commission structure. This review presents the data and a proposal to bring my compensation current.
+My hourly rate has been **$43.27/hr** for the last **21 months** with no adjustment. During that time, pricing increases have automatically raised technician compensation through their commission structure. This review presents the data and a proposal to bring my compensation current.
 
 ---
 
@@ -17,9 +17,9 @@ Technicians earn 24% of every dollar (21% commission + 3% quarterly bonus). When
 |--|--:|--:|--:|
 | Avg job ticket | $536 | $562 | **+4.8%** |
 | Tech earnings per job | $129 | $135 | **+4.8%** |
-| Tracy's base salary | $89,000 | $89,000 | **0.0%** |
+| Tracy's hourly rate | $43.27 | $43.27 | **0.0%** |
 
-Over the past 21 months, pricing changes alone gave each commission tech an estimated **$3,400/year** in additional earnings — same workload, higher prices. My base has not been adjusted.
+Over the past 21 months, pricing changes alone gave each commission tech an estimated **$1.96/hr raise** — same workload, higher prices. My rate has not been adjusted.
 
 > *Note: Dan (25%) and Danny (23%) received even larger automatic increases due to higher commission rates.*
 
@@ -29,26 +29,22 @@ Over the past 21 months, pricing changes alone gave each commission tech an esti
 
 Per Jill Dare's payroll records, techs average 65 hours per pay period (32.5 hrs/week). I work 44 hours per week. Tech compensation below is from QuickBooks payroll — actual amounts paid, not ServiceTitan estimates.
 
-| Tech | 2025 Comp (QB) |
-|------|---------------:|
-| Dan | $126,942 |
-| Tom | $98,000 |
-| Kris | $84,500 |
-| Neill | $83,000 |
-| Alan | $72,000 |
-| Kaleb | $63,000 |
-| **Avg (6 full-year techs)** | **$87,907** |
+| Tech | Eff. $/Hour (QB Payroll) |
+|------|-------------------------:|
+| Dan | $76.92/hr |
+| Tom | $59.36/hr |
+| Kris | $51.18/hr |
+| Neill | $50.27/hr |
+| Alan | $43.61/hr |
+| Kaleb | $38.16/hr |
+| **Avg (6 full-year techs)** | **$52.02/hr** |
 
 | | Tracy | Avg Tech (QB Payroll) |
 |--|--:|--:|
-| Annual comp | **$99,000** | **$87,907** |
+| **Effective $/hour** | **$43.27** | **$52.02** |
 | Hours/week | **44.0** | **32.5** |
-| Hours/year | 2,288 | 1,690 |
-| Effective $/hour | **$43.27** | **$52.02** |
 
-I earn more annually than the average tech — but I work **35% more hours** to get there. Per hour, techs earn **20% more** than I do.
-
-If I worked tech hours (32.5 hrs/week), my annual comp at my current rate would be **$73,160**.
+Techs earn **20% more per hour** and work **35% fewer hours**.
 
 ---
 
@@ -56,27 +52,26 @@ If I worked tech hours (32.5 hrs/week), my annual comp at my current rate would 
 
 | Period | Pricing Change | Tech Pay Impact | Tracy Pay Impact |
 |--------|---------------|----------------|-----------------|
-| Mid-2024 to present | +4.8% avg ticket | +~$3,400/yr per tech (automatic) | $0 |
+| Mid-2024 to present | +4.8% avg ticket | +~$1.96/hr per tech (automatic) | $0.00/hr |
 | Cost of living (2024-2025) | ~3-4%/yr | Absorbed by commission growth | Not absorbed |
 
 ---
 
 ## 4. Proposal
 
-| Component | Current | Proposed |
-|-----------|--------:|--------:|
-| Base salary | $89,000 | **$95,000** |
-| Quarterly bonus | $2,500/qtr flat ($10,000/yr) | **0.35% of quarterly revenue** (~$2,400/qtr — *less than current*) |
-| **Total estimated comp** | **$99,000** | **~$104,600** |
+| | Current | Proposed | Difference |
+|--|--------:|--------:|-----------:|
+| **Hourly rate** | **$43.27/hr** | **$45.87/hr** | **+$2.60/hr** |
+| Quarterly bonus | $2,500/qtr flat | 0.36% of revenue (~$2,466/qtr) | *less than current* |
 
-The quarterly bonus stays in the same range it's always been — roughly $2,400 per quarter at current volume. The only difference is tying it to revenue instead of a flat number, so it keeps pace with pricing the same way tech commissions do.
+The ask is **$2.60 more per hour**. The quarterly bonus actually goes down slightly — from $2,500 flat to ~$2,400 tied to revenue. The only structural change is linking it to business performance so it keeps pace with pricing.
 
 ### Why This Is Reasonable
 
-- The $6,000 base increase covers the 4.8% pricing catch-up ($4,272) plus partial cost-of-living for two years
-- The revenue-tied bonus replaces the current flat $2,500 — similar dollar amount, just tied to business performance
-- Total comp of ~$105K is below Florida market for Service Operations Manager ($100–115K base per Glassdoor, Salary.com — base only, before bonuses)
-- Still less than Dan, Tom, or Danny — all of whom work fewer hours
+- **$2.60/hour** to close a 21-month pricing gap — still below every tech's hourly rate
+- The quarterly bonus stays in the same range, just tied to revenue instead of flat
+- At $45.87/hr, Tracy would still be the lowest hourly rate in the building
+- Still less per hour than Dan, Tom, or Danny — all of whom work fewer hours
 
 ### Why Revenue-Tied Matters
 
@@ -105,19 +100,18 @@ With three new techs in training (Collin, Robert, Chris), the operational load i
 
 | | |
 |--|--|
-| Current base | $89,000 |
-| Current total comp | $99,000 |
+| Current hourly rate | $43.27/hr |
 | Months since last adjustment | 21 |
 | Hours/week | 44 |
 | Tech avg hours/week (per Jill/payroll) | 32.5 |
-| Effective hourly rate | $43.27 |
-| Tech avg hourly (QB payroll) | $52.02 |
+| Tech avg hourly (QB payroll) | $52.02/hr |
 | Hourly gap | Techs earn 20% more |
 | Pricing increase since Q1 2024 | 4.8% |
-| FL market rate, Service Ops Manager | $100–115K base |
-| Proposed base | $95,000 |
-| Proposed quarterly bonus | 0.35% of revenue (~$2,400/qtr) |
-| Proposed total comp | ~$104,600 |
+| Tech automatic raise from pricing | +$1.96/hr |
+| Tracy's raise from pricing | $0.00/hr |
+| **Proposed hourly rate** | **$45.87/hr (+$2.60)** |
+| Proposed quarterly bonus | 0.35% of revenue (~$2,400/qtr — less than current) |
+| Proposed hourly vs tech avg | Still $6.15/hr below tech average |
 
 ---
 

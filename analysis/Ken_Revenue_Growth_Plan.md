@@ -445,14 +445,14 @@ Scaling from $2.74M to $3.2M+ with 12 techs instead of 9 means more of everythin
 
 ## The Investment: Tracy's Compensation Adjustment
 
-| | Current | Proposed |
-|--|--:|--:|
-| Base salary | $89,000 | $95,000 |
-| Quarterly bonus | $2,500/qtr flat ($10,000/yr) | 0.35% of quarterly revenue (~$2,400/qtr, ~$9,600/yr) |
-| **Total comp** | **$99,000** | **~$104,600** |
-| **Increase** | | **~$5,600/year** |
+| | Current | Proposed | Difference |
+|--|--:|--:|--:|
+| Base salary | $89,000 | $95,000 | +$6,000/yr |
+| **Per hour** | **$43.27/hr** | **$45.87/hr** | **+$2.60/hr** |
+| Quarterly bonus | $2,500/qtr flat | 0.36% of revenue (~$2,466/qtr) | *less than current* |
+| **Total comp** | **$99,000** | **~$104,600** | |
 
-Tracy's base has been $89,000 for 21 months — no adjustment despite 4.8% pricing increases that automatically raised tech compensation. The proposed adjustment covers the pricing catch-up. The quarterly bonus stays in the same dollar range as today (~$2,400 vs $2,500) — the only change is tying it to revenue so it keeps pace with pricing going forward.
+The base increase is **$2.60 more per hour** — still below every tech on the team. The quarterly bonus actually goes down slightly (~$2,400 vs $2,500), just tied to revenue so it keeps pace with pricing going forward. Tracy's base has been $89,000 for 21 months with no adjustment.
 
 $5,600 represents roughly **1.2% of the identified growth opportunity**. If even one of these four initiatives succeeds because the back office is running well, the adjustment pays for itself.
 
